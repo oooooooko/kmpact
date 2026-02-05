@@ -1,0 +1,3 @@
+storePassword=AndroidProject
+keyAlias=AndroidProject
+keyPassword=AndroidProject
