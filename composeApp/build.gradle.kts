@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+import java.io.File
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -55,7 +56,6 @@ kotlin {
     }
 }
 
-
 compose.desktop {
     application {
         mainClass = "com.okko.kmpact.MainKt"
@@ -68,12 +68,23 @@ compose.desktop {
             copyright = "© 2026 KMP-OKKO Contributors. All rights reserved."
             vendor = "KMP-OKKO"
             
+            // 包含脚本资源文件
+            // 将项目根目录的androidcmdtools-shell和androidcmdtools-resources复制到应用包
+            includeAllModules = true
+            
             // macOS 配置
             macOS {
                 bundleID = "com.okko.kmpact"
                 iconFile.set(project.file("icon.icns"))
-                // 应用程序名称
                 appCategory = "public.app-category.developer-tools"
+                
+                // 包含额外的资源文件
+                infoPlist {
+                    extraKeysRawXml = """
+                        <key>LSMinimumSystemVersion</key>
+                        <string>10.13</string>
+                    """.trimIndent()
+                }
             }
             
             // Windows 配置
@@ -82,7 +93,57 @@ compose.desktop {
                 menuGroup = "AndroidCmdTools"
                 upgradeUuid = "A1B2C3D4-E5F6-7890-ABCD-EF1234567890"
             }
-
+            
+            // Linux 配置
+            linux {
+                iconFile.set(project.file("icon.png"))
+                packageName = "androidcmdtools"
+                debMaintainer = "kmpokko@example.com"
+                menuGroup = "Development"
+                appCategory = "Development"
+            }
+        }
+        
+        // 构建时包含资源文件
+        buildTypes.release.proguard {
+            isEnabled.set(false)
         }
     }
 }
+
+// 创建资源复制任务
+val copyResourcesToApp = tasks.register<Copy>("copyResourcesToApp") {
+    group = "compose desktop"
+    description = "复制资源文件到应用包"
+
+    // 在配置阶段设置源目录和目标目录，避免在执行阶段访问 project
+    val sourceDir = project.rootDir
+    val targetPath = layout.buildDirectory.dir("compose/binaries/main/app/AndroidCmdTools.app/Contents/app")
+    
+    from(sourceDir) {
+        include("androidcmdtools-shell/**")
+        include("androidcmdtools-resources/**")
+    }
+    
+    // macOS 应用包的目标路径
+    into(targetPath)
+}
+
+// 在所有任务配置完成后，设置依赖关系
+afterEvaluate {
+    // 在 createDistributable 之后复制资源
+    tasks.findByName("createDistributable")?.let { task ->
+        task.finalizedBy(copyResourcesToApp)
+    }
+    
+    // 在打包任务之前确保资源已复制
+    tasks.matching { 
+        it.name == "packageDmg" || 
+        it.name == "packageMsi" || 
+        it.name == "packageDeb" ||
+        it.name == "packageDistributionForCurrentOS"
+    }.configureEach {
+        mustRunAfter(copyResourcesToApp)
+    }
+}
+

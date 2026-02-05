@@ -42,7 +42,6 @@ actual class FileChooser {
                 null
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }
@@ -67,7 +66,6 @@ actual class FileChooser {
                 null
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }
