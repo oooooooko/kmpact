@@ -1,4 +1,4 @@
-# KMP-OKKO - AndroidCmdTools Compose Multiplatform
+# kmpact - AndroidCmdTools Compose Multiplatform
 
 <div align="center">
 
@@ -58,8 +58,8 @@ KMP-AndroidCmdTools 是一个将 AndroidCmdTools 的 190+ 个 Shell 脚本工具
 1. **克隆项目**
 
 ```
-git clone https://github.com/yourusername/kmp-okko.git
-cd kmp-okko
+git clone https://github.com/oooooooko/kmpact.git
+cd kmpact
 ```
 
 2. **编译项目**
