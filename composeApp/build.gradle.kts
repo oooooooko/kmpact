@@ -65,7 +65,7 @@ compose.desktop {
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
             packageName = "AndroidCmdTools"
-            packageVersion = "1.0.0"
+            packageVersion = "1.0.1"
             description = "Android开发工具集成平台"
             copyright = "© 2026 KMP-OKKO Contributors. All rights reserved."
             vendor = "KMP-OKKO"
