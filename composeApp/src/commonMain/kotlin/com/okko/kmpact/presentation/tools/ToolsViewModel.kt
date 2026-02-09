@@ -1,7 +1,9 @@
 package com.okko.kmpact.presentation.tools
 
 import androidx.lifecycle.viewModelScope
+import com.okko.kmpact.data.repository.RecentToolsRepositoryImpl
 import com.okko.kmpact.domain.model.ToolCommand
+import com.okko.kmpact.domain.repository.RecentToolsRepository
 import com.okko.kmpact.domain.usecase.ExecuteCommandUseCaseImpl
 import com.okko.kmpact.presentation.base.BaseViewModel
 import com.okko.kmpact.ui.components.LogEntry
@@ -21,6 +23,7 @@ class ToolsViewModel : BaseViewModel<ToolsUiState, ToolsIntent, ToolsEffect>(
 ) {
     
     private val executeCommandUseCase = ExecuteCommandUseCaseImpl()
+    private val recentToolsRepository: RecentToolsRepository = RecentToolsRepositoryImpl.getInstance()
     
     init {
         addLog(LogLevel.INFO, "工具界面已就绪")
@@ -60,6 +63,9 @@ class ToolsViewModel : BaseViewModel<ToolsUiState, ToolsIntent, ToolsEffect>(
             addLog(LogLevel.ERROR, "请先选择一个工具")
             return
         }
+        
+        // 添加到最近使用列表
+        recentToolsRepository.addRecentTool(command)
         
         viewModelScope.launch {
             addLog(LogLevel.COMMAND, "执行命令: ${command.name}")
@@ -151,5 +157,12 @@ class ToolsViewModel : BaseViewModel<ToolsUiState, ToolsIntent, ToolsEffect>(
         val minute = localDateTime.minute.toString().padStart(2, '0')
         val second = localDateTime.second.toString().padStart(2, '0')
         return "$hour:$minute:$second"
+    }
+    
+    /**
+     * 获取最近使用的工具列表
+     */
+    fun getRecentTools(): List<ToolCommand> {
+        return recentToolsRepository.getRecentTools(10)
     }
 }

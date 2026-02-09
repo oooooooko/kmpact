@@ -15,7 +15,7 @@
 
 ## 📖 项目简介
 
-KMP-AndroidCmdTools 是一个将 AndroidCmdTools 的 190+ 个 Shell 脚本工具集成到现代化 Compose Multiplatform 应用中的项目。提供直观的图形界面，让 Android 开发者能够轻松使用各种命令行工具，无需记忆复杂的命令参数。
+KMP-AndroidCmdTools 是一个将 AndroidCmdTools 的 50+ 个 Shell 脚本工具集成到现代化 Compose Multiplatform 应用中的项目。提供直观的图形界面，让 Android 开发者能够轻松使用各种命令行工具，无需记忆复杂的命令参数。
 
 ### 核心特性
 
@@ -137,6 +137,7 @@ composeApp/build/compose/binaries/main/msi/
 - **清除全局代理**: 清除设备全局代理设置
 - **获取屏幕信息**: 查看设备屏幕分辨率等信息
 - **获取顶层Activity**: 查看当前顶层 Activity 信息
+- **查看设备CPU架构**: 查看设备CPU架构和ABI信息
 - **导出ANR日志**: 导出应用 ANR 崩溃日志
 - **管理设备文件**: 浏览和管理设备文件系统
 - **运行Monkey测试**: 执行随机压力测试

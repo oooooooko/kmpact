@@ -80,6 +80,13 @@ fun Sidebar(
                 .padding(top = 16.dp)
         ) {
             SidebarItem(
+                icon = Icons.Default.History,
+                label = "最近使用",
+                isSelected = selectedItem == "recent_tools",
+                onClick = { onItemClick("recent_tools") }
+            )
+            
+            SidebarItem(
                 icon = Icons.Default.DeviceHub,
                 label = "设备管理",
                 isSelected = selectedItem == "device_manager",

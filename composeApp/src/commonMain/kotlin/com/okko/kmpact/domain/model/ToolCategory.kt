@@ -299,6 +299,15 @@ object ToolCommands {
         requiresDevice = true
     )
     
+    val GET_DEVICE_CPU_ABI = ToolCommand(
+        id = "get_device_cpu_abi",
+        name = "查看设备CPU架构",
+        description = "查看设备CPU架构和ABI信息",
+        category = ToolCategory.DEVICE_TOOLS,
+        scriptPath = "shell/device-tools/GetDeviceCpuAbi.sh",
+        requiresDevice = true
+    )
+    
     val GET_TOP_ACTIVITY = ToolCommand(
         id = "get_top_activity",
         name = "获取顶层Activity",
@@ -564,6 +573,7 @@ object ToolCommands {
         SET_GLOBAL_PROXY,
         CLEAR_GLOBAL_PROXY,
         GET_SCREEN_INFO,
+        GET_DEVICE_CPU_ABI,
         GET_TOP_ACTIVITY,
         EXPORT_ANR,
         MANAGE_FILE,

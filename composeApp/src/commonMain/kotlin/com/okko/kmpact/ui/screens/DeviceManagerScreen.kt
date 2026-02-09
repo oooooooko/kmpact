@@ -29,7 +29,9 @@ import kotlinx.coroutines.launch
 fun DeviceManagerScreen() {
     var devices by remember { mutableStateOf<List<DeviceInfo>>(emptyList()) }
     var selectedDevice by remember { mutableStateOf<DeviceInfo?>(null) }
+    var deviceDetails by remember { mutableStateOf<DeviceInfo?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+    var isLoadingDetails by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val deviceManager = remember { DeviceManager() }
     
@@ -43,16 +45,26 @@ fun DeviceManagerScreen() {
         isLoading = false
     }
     
+    // 加载选中设备的详细信息
+    LaunchedEffect(selectedDevice) {
+        selectedDevice?.let { device ->
+            isLoadingDetails = true
+            deviceDetails = deviceManager.getDeviceDetails(device.serialNumber)
+            isLoadingDetails = false
+        }
+    }
+    
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(AppColors.Gray50)
-            .padding(32.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         // 标题和刷新按钮
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
+                .padding(top = 32.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -93,124 +105,205 @@ fun DeviceManagerScreen() {
             }
         }
         
-        // 设备列表
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        // 可滚动内容区域
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
+            contentPadding = PaddingValues(
+                top = 50.dp,
+                bottom = 48.dp
+            ),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                Row(
+            // 设备列表
+            item {
+                Card(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                 ) {
-                    Text(
-                        text = "已连接的设备",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.TextPrimary
-                    )
-                    
-                    Text(
-                        text = "${devices.size} 台设备",
-                        fontSize = 14.sp,
-                        color = AppColors.TextSecondary
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                HorizontalDivider(color = AppColors.BorderLight)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                if (isLoading) {
-                    Box(
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
+                            .padding(24.dp)
                     ) {
-                        CircularProgressIndicator(color = AppColors.Primary)
-                    }
-                } else if (devices.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.PhoneAndroid,
-                                contentDescription = null,
-                                tint = AppColors.TextTertiary,
-                                modifier = Modifier.size(64.dp)
-                            )
                             Text(
-                                text = "未检测到设备",
-                                fontSize = 16.sp,
+                                text = "已连接的设备",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AppColors.TextPrimary
+                            )
+                            
+                            Text(
+                                text = "${devices.size} 台设备",
+                                fontSize = 14.sp,
                                 color = AppColors.TextSecondary
                             )
-                            Text(
-                                text = "请确保设备已连接并开启 USB 调试",
-                                fontSize = 13.sp,
-                                color = AppColors.TextTertiary
-                            )
                         }
-                    }
-                } else {
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.heightIn(max = 400.dp)
-                    ) {
-                        items(devices) { device ->
-                            DeviceItem(
-                                device = device,
-                                isSelected = device.serialNumber == selectedDevice?.serialNumber,
-                                onClick = { selectedDevice = device }
-                            )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        HorizontalDivider(color = AppColors.BorderLight)
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        if (isLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator(color = AppColors.Primary)
+                            }
+                        } else if (devices.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.PhoneAndroid,
+                                        contentDescription = null,
+                                        tint = AppColors.TextTertiary,
+                                        modifier = Modifier.size(64.dp)
+                                    )
+                                    Text(
+                                        text = "未检测到设备",
+                                        fontSize = 16.sp,
+                                        color = AppColors.TextSecondary
+                                    )
+                                    Text(
+                                        text = "请确保设备已连接并开启 USB 调试",
+                                        fontSize = 13.sp,
+                                        color = AppColors.TextTertiary
+                                    )
+                                }
+                            }
+                        } else {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                devices.forEach { device ->
+                                    DeviceItem(
+                                        device = device,
+                                        isSelected = device.serialNumber == selectedDevice?.serialNumber,
+                                        onClick = { selectedDevice = device }
+                                    )
+                                }
+                            }
                         }
                     }
                 }
             }
-        }
-        
-        // 选中设备的详细信息
-        if (selectedDevice != null) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "设备详情",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = AppColors.TextPrimary
-                    )
-                    
-                    HorizontalDivider(color = AppColors.BorderLight)
-                    
-                    DeviceDetailRow("序列号", selectedDevice!!.serialNumber)
-                    DeviceDetailRow("型号", selectedDevice!!.model)
-                    DeviceDetailRow("状态", selectedDevice!!.status)
+            
+            // 选中设备的详细信息
+            if (selectedDevice != null) {
+                item {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color.White),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "设备详情",
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = AppColors.TextPrimary
+                            )
+                            
+                            HorizontalDivider(color = AppColors.BorderLight)
+                            
+                            if (isLoadingDetails) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    CircularProgressIndicator(color = AppColors.Primary)
+                                }
+                            } else if (deviceDetails != null) {
+                                Column(
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    // 基本信息
+                                    Text(
+                                        text = "基本信息",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = AppColors.Primary
+                                    )
+                                    deviceDetails!!.name?.let { DeviceDetailRow("名称", it) }
+                                    deviceDetails!!.brand?.let { DeviceDetailRow("品牌", it) }
+                                    DeviceDetailRow("型号", deviceDetails!!.model)
+                                    DeviceDetailRow("序列号", deviceDetails!!.serialNumber)
+                                    deviceDetails!!.androidVersion?.let { DeviceDetailRow("Android版本", it) }
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    // 硬件信息
+                                    Text(
+                                        text = "硬件信息",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = AppColors.Primary
+                                    )
+                                    deviceDetails!!.processor?.let { DeviceDetailRow("处理器", it) }
+                                    deviceDetails!!.memory?.let { DeviceDetailRow("内存", it) }
+                                    deviceDetails!!.storageUsage?.let { DeviceDetailRow("存储使用", it) }
+                                    deviceDetails!!.kernelVersion?.let { DeviceDetailRow("内核版本", it) }
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    // 显示信息
+                                    Text(
+                                        text = "显示信息",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = AppColors.Primary
+                                    )
+                                    deviceDetails!!.physicalResolution?.let { DeviceDetailRow("物理分辨率", it) }
+                                    deviceDetails!!.resolution?.let { DeviceDetailRow("当前分辨率", it) }
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    // 网络信息
+                                    Text(
+                                        text = "网络信息",
+                                        fontSize = 14.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = AppColors.Primary
+                                    )
+                                    deviceDetails!!.wifi?.let { DeviceDetailRow("WiFi", it) }
+                                    deviceDetails!!.ipAddress?.let { DeviceDetailRow("IP地址", it) }
+                                }
+                            } else {
+                                DeviceDetailRow("序列号", selectedDevice!!.serialNumber)
+                                DeviceDetailRow("型号", selectedDevice!!.model)
+                                DeviceDetailRow("状态", selectedDevice!!.status)
+                            }
+                        }
+                    }
                 }
             }
         }
