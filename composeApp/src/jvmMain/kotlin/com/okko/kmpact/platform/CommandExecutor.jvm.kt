@@ -46,17 +46,17 @@ actual class CommandExecutor {
     ): CommandResult = withContext(Dispatchers.IO) {
         try {
             // 获取脚本路径
-            val actualScriptPath = command.scriptPath.replace("shell/", "androidcmdtools-shell/")
-            val scriptPath = findScriptPath(actualScriptPath)
+            val actualScriptPath = command.scriptPath?.replace("shell/", "androidcmdtools-shell/")
+            val scriptPath = actualScriptPath?.let { findScriptPath(it) }
             
             if (scriptPath == null || !scriptPath.exists()) {
-                val possiblePaths = findAllPossiblePaths(actualScriptPath)
+                val possiblePaths = actualScriptPath?.let { findAllPossiblePaths(it) }
                 val errorMsg = "脚本文件不存在: $actualScriptPath\n" +
                         "查找路径: ${scriptPath?.absolutePath ?: "未找到"}\n" +
                         "当前工作目录: ${System.getProperty("user.dir")}\n" +
                         "应用路径: ${getApplicationPath()}\n" +
                         "JAR路径: ${getJarPath()}\n" +
-                        "尝试的所有路径:\n${possiblePaths.joinToString("\n") { "  - ${it.absolutePath} (存在: ${it.exists()})" }}"
+                        possiblePaths?.let { "尝试的所有路径:\n${it.joinToString("\n") { "  - ${it.absolutePath} (存在: ${it.exists()})" }}" }
                 onOutput?.invoke(errorMsg)
                 return@withContext CommandResult(
                     success = false,

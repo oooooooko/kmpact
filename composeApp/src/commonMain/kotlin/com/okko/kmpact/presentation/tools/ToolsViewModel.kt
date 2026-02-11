@@ -38,6 +38,7 @@ class ToolsViewModel : BaseViewModel<ToolsUiState, ToolsIntent, ToolsEffect>(
             is ToolsIntent.UpdateInput -> handleUpdateInput(intent.input)
             is ToolsIntent.SendInput -> handleSendInput()
             is ToolsIntent.ClearLogs -> handleClearLogs()
+            is ToolsIntent.RecordToolUsage -> handleRecordToolUsage(intent.command)
         }
     }
     
@@ -130,6 +131,11 @@ class ToolsViewModel : BaseViewModel<ToolsUiState, ToolsIntent, ToolsEffect>(
     
     private fun handleClearLogs() {
         updateState { copy(logs = emptyList()) }
+    }
+    
+    private fun handleRecordToolUsage(command: ToolCommand) {
+        // 添加到最近使用列表
+        recentToolsRepository.addRecentTool(command)
     }
     
     /**

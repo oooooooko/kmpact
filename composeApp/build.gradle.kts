@@ -47,14 +47,6 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
         }
-        jsMain.dependencies {
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-        }
-        wasmJsMain.dependencies {
-            implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-        }
     }
 }
 

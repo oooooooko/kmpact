@@ -4,7 +4,6 @@ import java.awt.FileDialog
 import java.awt.Frame
 import java.io.FilenameFilter
 import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
 
 /**
  * JVM 平台的文件选择器实现

@@ -42,4 +42,9 @@ sealed interface ToolsIntent : BaseIntent {
      * 清除日志
      */
     data object ClearLogs : ToolsIntent
+    
+    /**
+     * 记录工具使用
+     */
+    data class RecordToolUsage(val command: ToolCommand) : ToolsIntent
 }

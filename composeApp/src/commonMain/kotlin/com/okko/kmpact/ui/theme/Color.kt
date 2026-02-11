@@ -54,4 +54,13 @@ object AppColors {
     val Gray700 = Color(0xFF374151)
     val Gray800 = Color(0xFF1F2937)
     val Gray900 = Color(0xFF111827)
+    
+    // 绿色系列
+    val Green50 = Color(0xFFF0FDF4)
+    val Green100 = Color(0xFFDCFCE7)
+    val Green500 = Color(0xFF22C55E)
+    
+    // 红色系列
+    val Red50 = Color(0xFFFEF2F2)
+    val Red500 = Color(0xFFEF4444)
 }

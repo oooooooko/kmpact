@@ -8,9 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,14 +26,16 @@ import org.jetbrains.compose.resources.painterResource
 
 /**
  * 侧边栏组件
- * 
+ *
  * @param selectedItem 当前选中的菜单项
  * @param onItemClick 菜单项点击回调
+ * @param onShowToast Toast显示回调
  */
 @Composable
 fun Sidebar(
     selectedItem: String,
     onItemClick: (String) -> Unit,
+    onShowToast: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -72,7 +73,7 @@ fun Sidebar(
                 color = AppColors.Blue900
             )
         }
-        
+
         // 导航菜单
         Column(
             modifier = Modifier
@@ -85,35 +86,42 @@ fun Sidebar(
                 isSelected = selectedItem == "recent_tools",
                 onClick = { onItemClick("recent_tools") }
             )
-            
+
             SidebarItem(
                 icon = Icons.Default.DeviceHub,
                 label = "设备管理",
                 isSelected = selectedItem == "device_manager",
                 onClick = { onItemClick("device_manager") }
             )
-            
+
             SidebarItem(
                 icon = Icons.Default.Build,
                 label = "包体工具",
                 isSelected = selectedItem == "package_tools",
                 onClick = { onItemClick("package_tools") }
             )
-            
+
             SidebarItem(
-                icon = Icons.Default.Code,
+                icon = Icons.Default.Adb,
                 label = "逆向工具",
                 isSelected = selectedItem == "reverse_engineer",
                 onClick = { onItemClick("reverse_engineer") }
             )
-            
+
             SidebarItem(
-                icon = Icons.Default.Terminal,
+                icon = Icons.Default.PhoneAndroid,
                 label = "设备工具",
                 isSelected = selectedItem == "adb_terminal",
                 onClick = { onItemClick("adb_terminal") }
             )
-            
+
+            SidebarItem(
+                icon = Icons.Default.Code,
+                label = "开发类工具",
+                isSelected = selectedItem == "dev_tools",
+                onClick = { onItemClick("dev_tools") }
+            )
+
             SidebarItem(
                 icon = Icons.Default.Key,
                 label = "SSH密钥工具",
@@ -121,22 +129,24 @@ fun Sidebar(
                 onClick = { onItemClick("ssh_key_tools") }
             )
         }
-        
+
         Spacer(modifier = Modifier.weight(1f))
-        
-        // 保存的配置区域
+
+        // 设置按钮
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(24.dp)
         ) {
-            SavedProfileItem(
-                name = "Release Signing v2",
-                onClick = { }
+            SettingsButton(
+                onClick = {
+                    onItemClick("settings")
+                }
             )
         }
     }
 }
+
 
 /**
  * 侧边栏菜单项
@@ -150,7 +160,7 @@ private fun SidebarItem(
 ) {
     val backgroundColor = if (isSelected) AppColors.SidebarItemActive else Color.Transparent
     val textColor = if (isSelected) AppColors.Primary else AppColors.TextSecondary
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,12 +186,12 @@ private fun SidebarItem(
     }
 }
 
+
 /**
- * 保存的配置项
+ * 设置按钮
  */
 @Composable
-private fun SavedProfileItem(
-    name: String,
+private fun SettingsButton(
     onClick: () -> Unit
 ) {
     Row(
@@ -196,13 +206,13 @@ private fun SavedProfileItem(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.Bookmark,
-            contentDescription = "Profile",
+            imageVector = Icons.Default.Settings,
+            contentDescription = "设置",
             tint = AppColors.Primary,
             modifier = Modifier.size(16.dp)
         )
         Text(
-            text = name,
+            text = "Release V2",
             fontSize = 12.sp,
             fontWeight = FontWeight.Medium,
             color = AppColors.Blue800

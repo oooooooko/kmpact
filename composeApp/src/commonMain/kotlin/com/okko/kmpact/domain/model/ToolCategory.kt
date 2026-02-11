@@ -22,7 +22,12 @@ enum class ToolCategory(val displayName: String, val description: String) {
     /**
      * 密钥工具
      */
-    KEY_TOOLS("密钥工具", "SSH密钥管理")
+    KEY_TOOLS("密钥工具", "SSH密钥管理"),
+
+    /**
+     * 开发类工具
+     */
+    DEV_TOOLS("开发类工具",  "Json查看、编码转换等")
 }
 
 /**
@@ -50,9 +55,9 @@ data class ToolCommand(
     val category: ToolCategory,
     
     /**
-     * 脚本路径（相对于AndroidCmdTools目录）
+     * 脚本路径（相对于AndroidCmdTools目录），为空表示不使用脚本实现
      */
-    val scriptPath: String,
+    val scriptPath: String? = null,
     
     /**
      * 是否需要选择设备
@@ -540,6 +545,64 @@ object ToolCommands {
         scriptPath = "shell/ssh-key-tools/OpenSshKeyDir.sh"
     )
     
+    // ========== 开发类工具 ==========
+    
+    val JSON_BEAUTIFY = ToolCommand(
+        id = "json_beautify",
+        name = "Json美化",
+        description = "格式化和美化JSON数据",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
+    
+    val REGEX_CHEATSHEET = ToolCommand(
+        id = "regex_cheatsheet",
+        name = "正则公式速查",
+        description = "常用正则表达式速查表",
+        category = ToolCategory.DEV_TOOLS
+    )
+    
+    val ENCODING_CONVERTER = ToolCommand(
+        id = "encoding_converter",
+        name = "信息编码转换",
+        description = "Base64、URL编码等转换工具",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
+    
+    val TIMESTAMP_CONVERTER = ToolCommand(
+        id = "timestamp_converter",
+        name = "时间戳转换",
+        description = "时间戳与日期时间互转",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
+    
+    val COLOR_CONVERTER = ToolCommand(
+        id = "color_converter",
+        name = "颜色值转换",
+        description = "HEX、RGB、HSL等颜色格式转换",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
+    
+    val ANDROID_ICON_GENERATOR = ToolCommand(
+        id = "android_icon_generator",
+        name = "Android图标生成",
+        description = "生成各种尺寸的Android应用图标",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
+    
+//    val QRCODE_TOOL = ToolCommand(
+//        id = "qrcode_tool",
+//        name = "二维码编码解码",
+//        description = "生成和识别二维码",
+//        category = ToolCategory.DEV_TOOLS,
+//        requiresInput = true
+//    )
+
+    
     /**
      * 获取所有命令
      */
@@ -604,7 +667,16 @@ object ToolCommands {
         CREATE_SSH_KEY,
         DELETE_SSH_KEY,
         QUERY_SSH_PUBLIC_KEY,
-        OPEN_SSH_KEY_DIR
+        OPEN_SSH_KEY_DIR,
+        
+        // 开发类工具
+        JSON_BEAUTIFY,
+        REGEX_CHEATSHEET,
+        ENCODING_CONVERTER,
+        TIMESTAMP_CONVERTER,
+        COLOR_CONVERTER,
+        ANDROID_ICON_GENERATOR,
+        //QRCODE_TOOL
     )
     
     /**

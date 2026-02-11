@@ -27,6 +27,7 @@ import com.okko.kmpact.platform.SystemPaths
 import com.okko.kmpact.presentation.tools.*
 import com.okko.kmpact.ui.components.FileInputField
 import com.okko.kmpact.ui.components.TerminalLog
+import com.okko.kmpact.ui.components.devtools.*
 import com.okko.kmpact.ui.theme.AppColors
 
 /**
@@ -85,45 +86,59 @@ fun ToolsScreen(
         ) {
             // 工具详情
             if (uiState.selectedCommand != null) {
-                ToolDetail(
-                    command = uiState.selectedCommand!!,
-                    parameters = uiState.parameters,
-                    isExecuting = uiState.isExecuting,
-                    onParameterChange = { key, value ->
-                        viewModel.handleIntent(ToolsIntent.UpdateParameter(key, value))
-                    },
-                    onExecute = {
-                        viewModel.handleIntent(ToolsIntent.ExecuteCommand)
-                    },
-                    onCancel = {
-                        viewModel.handleIntent(ToolsIntent.CancelExecution)
-                    }
-                )
+                if (uiState.selectedCommand!!.category == ToolCategory.DEV_TOOLS) {
+                    // 开发类工具显示自定义界面
+                    DevToolsPlaceholder(
+                        command = uiState.selectedCommand!!,
+                        onToolUsed = {
+                            // 记录到最近使用
+                            viewModel.handleIntent(ToolsIntent.RecordToolUsage(uiState.selectedCommand!!))
+                        }
+                    )
+                } else {
+                    // 其他工具显示正常的执行界面
+                    ToolDetail(
+                        command = uiState.selectedCommand!!,
+                        parameters = uiState.parameters,
+                        isExecuting = uiState.isExecuting,
+                        onParameterChange = { key, value ->
+                            viewModel.handleIntent(ToolsIntent.UpdateParameter(key, value))
+                        },
+                        onExecute = {
+                            viewModel.handleIntent(ToolsIntent.ExecuteCommand)
+                        },
+                        onCancel = {
+                            viewModel.handleIntent(ToolsIntent.CancelExecution)
+                        }
+                    )
+                }
             } else {
                 EmptyState()
             }
             
-            // 终端日志和输入
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                // 终端日志
-                TerminalLog(
-                    logs = uiState.logs,
-                    onClear = { viewModel.handleIntent(ToolsIntent.ClearLogs) },
-                    modifier = Modifier.weight(1f)
-                )
-                
-                // 输入框（仅在需要输入时显示）
-                if (uiState.needsInput || uiState.isExecuting) {
-                    InputField(
-                        value = uiState.currentInput,
-                        onValueChange = { viewModel.handleIntent(ToolsIntent.UpdateInput(it)) },
-                        onSend = { viewModel.handleIntent(ToolsIntent.SendInput) },
-                        enabled = uiState.needsInput,
-                        placeholder = if (uiState.needsInput) "输入内容后按回车或点击发送..." else "等待命令提示..."
+            // 终端日志和输入（仅非开发类工具显示）
+            if (uiState.selectedCommand?.category != ToolCategory.DEV_TOOLS) {
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // 终端日志
+                    TerminalLog(
+                        logs = uiState.logs,
+                        onClear = { viewModel.handleIntent(ToolsIntent.ClearLogs) },
+                        modifier = Modifier.weight(1f)
                     )
+                    
+                    // 输入框（仅在需要输入时显示）
+                    if (uiState.needsInput || uiState.isExecuting) {
+                        InputField(
+                            value = uiState.currentInput,
+                            onValueChange = { viewModel.handleIntent(ToolsIntent.UpdateInput(it)) },
+                            onSend = { viewModel.handleIntent(ToolsIntent.SendInput) },
+                            enabled = uiState.needsInput,
+                            placeholder = if (uiState.needsInput) "输入内容后按回车或点击发送..." else "等待命令提示..."
+                        )
+                    }
                 }
             }
         }
@@ -884,5 +899,111 @@ private fun getCategoryIcon(category: ToolCategory): ImageVector {
         ToolCategory.DEVICE_TOOLS -> Icons.Default.PhoneAndroid
         ToolCategory.REVERSE_TOOLS -> Icons.Default.Code
         ToolCategory.KEY_TOOLS -> Icons.Default.Key
+        ToolCategory.DEV_TOOLS -> Icons.Default.Code
+    }
+}
+
+/**
+ * 开发类工具占位符
+ */
+@Composable
+private fun DevToolsPlaceholder(
+    command: ToolCommand,
+    onToolUsed: () -> Unit
+) {
+    // 记录工具使用（只在首次渲染时记录）
+    LaunchedEffect(command.id) {
+        onToolUsed()
+    }
+    
+    when (command.id) {
+        "json_beautify" -> JsonBeautifyComponent()
+        "regex_cheatsheet" -> RegexCheatsheetComponent()
+        "encoding_converter" -> EncodingConverterComponent()
+        "timestamp_converter" -> TimestampConverterComponent()
+        "color_converter" -> ColorConverterComponent()
+        "radix_converter" -> RadixConverterComponent()
+        "android_icon_generator" -> AndroidIconGeneratorComponent()
+        "qrcode_tool" -> QrcodeToolComponent()
+        else -> {
+            // 默认占位符
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // 工具图标
+                    Icon(
+                        imageVector = Icons.Default.Code,
+                        contentDescription = null,
+                        tint = AppColors.Primary,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    
+                    // 工具名称
+                    Text(
+                        text = command.name,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AppColors.TextPrimary
+                    )
+                    
+                    // 工具描述
+                    Text(
+                        text = command.description,
+                        fontSize = 14.sp,
+                        color = AppColors.TextSecondary,
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // 提示信息
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        colors = CardDefaults.cardColors(containerColor = AppColors.Blue50),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                tint = AppColors.Primary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                            
+                            Text(
+                                text = "此功能正在开发中",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = AppColors.Primary
+                            )
+                            
+                            Text(
+                                text = "开发类工具将采用全新的交互界面，敬请期待！",
+                                fontSize = 13.sp,
+                                color = AppColors.TextSecondary,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }

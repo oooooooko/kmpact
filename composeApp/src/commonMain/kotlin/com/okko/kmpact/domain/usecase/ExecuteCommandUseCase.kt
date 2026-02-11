@@ -58,17 +58,19 @@ class ExecuteCommandUseCaseImpl(
     ): Result<CommandResult> {
         return try {
             // 转换脚本路径
-            val actualScriptPath = command.scriptPath.replace("shell/", "androidcmdtools-shell/")
+            val actualScriptPath = command.scriptPath?.replace("shell/", "androidcmdtools-shell/")
             
             // 输出命令信息
             onOutput?.invoke("⏳ 正在执行命令: ${command.name}")
             onOutput?.invoke("📂 脚本路径: $actualScriptPath")
             
             // 检查脚本是否存在
-            if (!commandExecutor.checkScriptExists(command.scriptPath)) {
-                val error = "脚本文件不存在: $actualScriptPath"
-                onOutput?.invoke("❌ $error")
-                return Result.failure(Exception(error))
+            command.scriptPath?.let {
+                if (!commandExecutor.checkScriptExists(it)) {
+                    val error = "脚本文件不存在: $actualScriptPath"
+                    onOutput?.invoke("❌ $error")
+                    return Result.failure(Exception(error))
+                }
             }
             
             onOutput?.invoke("✅ 脚本文件存在")

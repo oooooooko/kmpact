@@ -8,8 +8,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.okko.kmpact.domain.model.ToolCategory
 import com.okko.kmpact.presentation.tools.ToolsViewModel
 import com.okko.kmpact.ui.components.Sidebar
+import com.okko.kmpact.ui.components.Toast
+import com.okko.kmpact.ui.components.ToastData
+import com.okko.kmpact.ui.components.ToastPosition
+import com.okko.kmpact.ui.components.ToastType
 import com.okko.kmpact.ui.screens.DeviceManagerScreen
 import com.okko.kmpact.ui.screens.RecentToolsScreen
+import com.okko.kmpact.ui.screens.SettingsScreen
 import com.okko.kmpact.ui.screens.ToolsScreen
 
 /**
@@ -17,68 +22,98 @@ import com.okko.kmpact.ui.screens.ToolsScreen
  */
 @Composable
 fun App() {
+    // 初始化设置管理器
+    LaunchedEffect(Unit) {
+        com.okko.kmpact.data.settings.SettingsManager.init()
+    }
+    
     MaterialTheme {
         var selectedMenuItem by remember { mutableStateOf("recent_tools") }
         var refreshTrigger by remember { mutableStateOf(0) }
+        var showToast by remember { mutableStateOf(false) }
         
         // 创建一个全局的 ToolsViewModel 用于管理最近使用
         val toolsViewModel: ToolsViewModel = viewModel { ToolsViewModel() }
         
-        Row(modifier = Modifier.fillMaxSize()) {
-            // 侧边栏
-            Sidebar(
-                selectedItem = selectedMenuItem,
-                onItemClick = { 
-                    selectedMenuItem = it
-                    // 切换到最近使用时刷新列表
-                    if (it == "recent_tools") {
-                        refreshTrigger++
-                    }
-                }
-            )
-            
-            // 主内容区域
-            Box(modifier = Modifier.fillMaxSize()) {
-                when (selectedMenuItem) {
-                    "recent_tools" -> {
-                        // 最近使用
-                        val recentTools = remember(refreshTrigger) { 
-                            toolsViewModel.getRecentTools() 
+        Box(modifier = Modifier.fillMaxSize()) {
+            Row(modifier = Modifier.fillMaxSize()) {
+                // 侧边栏
+                Sidebar(
+                    selectedItem = selectedMenuItem,
+                    onItemClick = { 
+                        selectedMenuItem = it
+                        // 切换到最近使用时刷新列表
+                        if (it == "recent_tools") {
+                            refreshTrigger++
                         }
-                        RecentToolsScreen(
-                            recentTools = recentTools,
-                            onToolClick = { tool ->
-                                // 根据工具分类跳转到对应页面
-                                selectedMenuItem = when (tool.category) {
-                                    ToolCategory.PACKAGE_TOOLS -> "package_tools"
-                                    ToolCategory.DEVICE_TOOLS -> "adb_terminal"
-                                    ToolCategory.REVERSE_TOOLS -> "reverse_engineer"
-                                    ToolCategory.KEY_TOOLS -> "ssh_key_tools"
-                                }
+                    },
+                    onShowToast = {
+                        showToast = true
+                    }
+                )
+                
+                // 主内容区域
+                Box(modifier = Modifier.fillMaxSize()) {
+                    when (selectedMenuItem) {
+                        "recent_tools" -> {
+                            // 最近使用
+                            val recentTools = remember(refreshTrigger) { 
+                                toolsViewModel.getRecentTools() 
                             }
-                        )
-                    }
-                    "device_manager" -> {
-                        // 设备管理
-                        DeviceManagerScreen()
-                    }
-                    "package_tools" -> {
-                        // 包体工具
-                        ToolsScreen(category = ToolCategory.PACKAGE_TOOLS)
-                    }
-                    "reverse_engineer" -> {
-                        // 逆向工具
-                        ToolsScreen(category = ToolCategory.REVERSE_TOOLS)
-                    }
-                    "adb_terminal" -> {
-                        // 终端工具（暂时显示设备工具）
-                        ToolsScreen(category = ToolCategory.DEVICE_TOOLS)
-                    }
-                    "ssh_key_tools" -> {
-                        // SSH密钥工具
-                        ToolsScreen(category = ToolCategory.KEY_TOOLS)
+                            RecentToolsScreen(
+                                recentTools = recentTools,
+                                onToolClick = { tool ->
+                                    // 根据工具分类跳转到对应页面
+                                    selectedMenuItem = when (tool.category) {
+                                        ToolCategory.PACKAGE_TOOLS -> "package_tools"
+                                        ToolCategory.DEVICE_TOOLS -> "adb_terminal"
+                                        ToolCategory.REVERSE_TOOLS -> "reverse_engineer"
+                                        ToolCategory.KEY_TOOLS -> "ssh_key_tools"
+                                        ToolCategory.DEV_TOOLS -> "dev_tools"
+                                    }
+                                }
+                            )
+                        }
+                        "device_manager" -> {
+                            // 设备管理
+                            DeviceManagerScreen()
+                        }
+                        "package_tools" -> {
+                            // 包体工具
+                            ToolsScreen(category = ToolCategory.PACKAGE_TOOLS)
+                        }
+                        "reverse_engineer" -> {
+                            // 逆向工具
+                            ToolsScreen(category = ToolCategory.REVERSE_TOOLS)
+                        }
+                        "adb_terminal" -> {
+                            // 终端工具（暂时显示设备工具）
+                            ToolsScreen(category = ToolCategory.DEVICE_TOOLS)
+                        }
+                        "ssh_key_tools" -> {
+                            // SSH密钥工具
+                            ToolsScreen(category = ToolCategory.KEY_TOOLS)
+                        }
+                        "dev_tools" -> {
+                            // 开发类工具
+                            ToolsScreen(category = ToolCategory.DEV_TOOLS)
+                        }
+                        "settings" -> {
+                            // 设置界面
+                            SettingsScreen(
+                                onBack = { selectedMenuItem = "recent_tools" }
+                            )
+                        }
                     }
                 }
+            }
+            
+            // Toast显示在整个窗口层级
+            if (showToast) {
+                Toast(
+                    toastData = ToastData("此功能正在开发中，敬请期待...", ToastType.INFO, 2000L, ToastPosition.CENTER),
+                    onDismiss = { showToast = false }
+                )
             }
         }
     }

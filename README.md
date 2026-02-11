@@ -41,6 +41,10 @@ KMP-AndroidCmdTools 是一个将 AndroidCmdTools 的 50+ 个 Shell 脚本工具�
 
 ![](screen/4.png)
 
+![](screen/5.png)
+
+![](screen/6.png)
+
 ---
 
 ## 🚀 快速开始
@@ -169,23 +173,22 @@ composeApp/build/compose/binaries/main/msi/
 - **dex转class**: 将 dex 文件转换为 class 文件
 - **class转dex**: 将 class 文件转换为 dex
 
-### 🔑 密钥工具 (4个)
+### 🔑 密钥工具
 
 - **创建SSH密钥**: 生成新的 SSH 密钥对
 - **删除SSH密钥**: 删除指定的 SSH 密钥
 - **查询SSH公钥**: 查看 SSH 公钥内容
 - **打开SSH密钥目录**: 在文件管理器中打开 .ssh 目录
 
+### 🛠 开发者常用工具
 
----
-
-### 技术栈
-
-- **Kotlin**: 2.3.0
-- **Compose Multiplatform**: 1.10.0
-- **Kotlin Coroutines**: 异步操作
-- **kotlinx-datetime**: 时间处理
-- **Material Design 3**: UI 设计
+- **Json美化**: 开发中...
+- **正则公式速查**: 常用正则表达式速查表
+- **信息编码转换**: Base64、URL编码等转换工具
+- **时间戳转换**: 时间戳与日期时间互转
+- **颜色值转换**: HEX、RGB、HSL等颜色格式转换
+- **Android图标生成**: 生成各种尺寸的 Android 应用图标
+- **二维码编码解码**: 开发中...
 
 ---
 

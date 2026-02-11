@@ -42,12 +42,6 @@ fun RecentToolsScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(bottom = 24.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.History,
-                contentDescription = "最近使用",
-                tint = AppColors.Primary,
-                modifier = Modifier.size(32.dp)
-            )
             Column {
                 Text(
                     text = "最近使用",
