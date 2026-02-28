@@ -46,6 +46,9 @@ kotlin {
             implementation(libs.kotlinx.coroutinesSwing)
             implementation(compose.material3)
             implementation(compose.materialIconsExtended)
+            // ZXing 二维码库
+            implementation("com.google.zxing:core:3.5.3")
+            implementation("com.google.zxing:javase:3.5.3")
         }
     }
 }

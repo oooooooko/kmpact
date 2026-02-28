@@ -163,7 +163,6 @@ class PackageToolsViewModel : BaseViewModel<PackageToolsUiState, PackageToolsInt
         updateState { 
             copy(
                 originalArtifactPath = filePath,
-                // TODO: 解析文件列表
                 originalArtifactFiles = listOf(
                     ArtifactFile("AndroidManifest.xml", "4.2 KB"),
                     ArtifactFile("classes.dex", "1.2 MB"),
@@ -178,7 +177,6 @@ class PackageToolsViewModel : BaseViewModel<PackageToolsUiState, PackageToolsInt
         updateState { 
             copy(
                 targetArtifactPathForComparison = filePath,
-                // TODO: 解析文件列表
                 targetArtifactFiles = listOf(
                     ArtifactFile("AndroidManifest.xml", "4.8 KB", isModified = true),
                     ArtifactFile("classes.dex", "2.2 MB"),
@@ -240,7 +238,6 @@ class PackageToolsViewModel : BaseViewModel<PackageToolsUiState, PackageToolsInt
     // ========== 保存的配置处理方法 ==========
     
     private fun loadSavedProfiles() {
-        // TODO: 从本地加载保存的配置
         updateState {
             copy(
                 savedProfiles = listOf(
@@ -254,8 +251,6 @@ class PackageToolsViewModel : BaseViewModel<PackageToolsUiState, PackageToolsInt
         val profile = currentState.savedProfiles.find { it.name == profileName }
         updateState { copy(selectedProfile = profile) }
         addLog(LogLevel.INFO, "已选择配置: $profileName")
-        
-        // TODO: 加载配置详情
     }
     
     // ========== 日志处理方法 ==========

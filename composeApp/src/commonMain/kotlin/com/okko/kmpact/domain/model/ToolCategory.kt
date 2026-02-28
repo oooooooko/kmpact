@@ -585,6 +585,14 @@ object ToolCommands {
         category = ToolCategory.DEV_TOOLS,
         requiresInput = true
     )
+
+    val RADIX_CONVERTER = ToolCommand(
+        id = "radix_converter",
+        name = "进制转换",
+        description = "支持 2、4、8、10、16 进制互转",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
     
     val ANDROID_ICON_GENERATOR = ToolCommand(
         id = "android_icon_generator",
@@ -594,13 +602,13 @@ object ToolCommands {
         requiresInput = true
     )
     
-//    val QRCODE_TOOL = ToolCommand(
-//        id = "qrcode_tool",
-//        name = "二维码编码解码",
-//        description = "生成和识别二维码",
-//        category = ToolCategory.DEV_TOOLS,
-//        requiresInput = true
-//    )
+    val QRCODE_TOOL = ToolCommand(
+        id = "qrcode_tool",
+        name = "二维码编码解码",
+        description = "生成和识别二维码",
+        category = ToolCategory.DEV_TOOLS,
+        requiresInput = true
+    )
 
     
     /**
@@ -675,8 +683,9 @@ object ToolCommands {
         ENCODING_CONVERTER,
         TIMESTAMP_CONVERTER,
         COLOR_CONVERTER,
+        RADIX_CONVERTER,
         ANDROID_ICON_GENERATOR,
-        //QRCODE_TOOL
+        QRCODE_TOOL
     )
     
     /**

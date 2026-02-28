@@ -394,7 +394,6 @@ private fun RightPanel(
                             
                             IconButton(
                                 onClick = {
-                                    // TODO: 实现复制到剪贴板功能
                                     clipboardManager.setText(AnnotatedString(regexCode))
                                 }
                             ) {

@@ -52,13 +52,6 @@ fun SettingsScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Default.Settings,
-                contentDescription = null,
-                tint = AppColors.Primary,
-                modifier = Modifier.size(32.dp)
-            )
-            
             Column {
                 Text(
                     text = "应用设置",
