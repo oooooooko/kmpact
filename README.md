@@ -188,7 +188,7 @@ composeApp/build/compose/binaries/main/msi/
 - **时间戳转换**: 时间戳与日期时间互转
 - **颜色值转换**: HEX、RGB、HSL等颜色格式转换
 - **Android图标生成**: 生成各种尺寸的 Android 应用图标
-- **二维码编码解码**: 开发中...
+- **二维码编码解码**: 生成和识别二维码
 
 ---
 

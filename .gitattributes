@@ -1,1 +1,4 @@
+androidcmdtools-resources/jadx-1.5.1/lib/jadx-1.5.1-all.jar filter=lfs diff=lfs merge=lfs -text
+*.jar filter=lfs diff=lfs merge=lfs -text
+androidcmdtools-resources/jadx-1.5.1-all.jar filter=lfs diff=lfs merge=lfs -text
 androidcmdtools-resources/jadx-1.5.3/lib/jadx-1.5.3-all.jar filter=lfs diff=lfs merge=lfs -text
