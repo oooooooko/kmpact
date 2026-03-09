@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : Git 历史作者重写脚本（filter-branch 改写身份）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../../common/FileTools.sh"
-source "${scriptDirPath}/../../../common/FileTools.sh"
-[ -z "" ] || source "../../../business/GitSelector.sh"
-source "${scriptDirPath}/../../../business/GitSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../../common/SystemPlatform.sh" && \
+source "../../../common/EnvironmentTools.sh" && \
+source "../../../common/FileTools.sh" && \
+source "../../../business/GitSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 backupOldTags() {
     tagNamesBefore=$(cd "${repositoryDirPath}" && git tag < /dev/null 2>/dev/null || echo "")
@@ -129,10 +130,10 @@ main() {
     echo "新用户名：${newName} 新邮箱：${newEmail}"
     echo "🤔 共有 ${matchCount} 个提交的作者或提交者信息将被改写为：${newName} <${newEmail}>，请问是否继续？（y/n）"
     read -r rewriteConfirm
-    if [[ "${rewriteConfirm}" == "n" || "${rewriteConfirm}" == "N" ]]; then
+    if [[ "${rewriteConfirm}" =~ ^[nN]$ ]]; then
         echo "✅ 用户手动取消操作"
         exit 0
-    elif [[ "${rewriteConfirm}" != "y" && "${rewriteConfirm}" != "Y" ]]; then
+    elif [[ ! "${rewriteConfirm}" =~ ^[yY]$ ]]; then
         echo "❌ 无效选择，已取消操作"
         exit 1
     fi

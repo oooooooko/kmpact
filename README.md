@@ -115,6 +115,7 @@ composeApp/build/compose/binaries/main/msi/
 - **Support转AndroidX**: 将 Support 库转换为 AndroidX
 - **AndroidX转Support**: 将 AndroidX 转换为 Support 库
 - **包体比较**: 比较 APK/AAR/JAR/AAB 包体差异
+- **aab转apk**: 将 aab 转换为 apks
 
 ### 📱 设备工具 (30个)
 
@@ -182,7 +183,6 @@ composeApp/build/compose/binaries/main/msi/
 
 ### 🛠 开发者常用工具
 
-- **Json美化**: 开发中...
 - **正则公式速查**: 常用正则表达式速查表
 - **信息编码转换**: Base64、URL编码等转换工具
 - **时间戳转换**: 时间戳与日期时间互转

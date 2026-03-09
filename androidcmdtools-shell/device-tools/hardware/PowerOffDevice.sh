@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : 设备关机脚本（adb 或 fastboot 关机）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 powerOffDeviceByAdb() {
     local deviceId=$1
@@ -50,7 +52,7 @@ powerOffDeviceForDevice() {
 
     echo "你确定要对设备进行关机？（y/n）"
     read -r powerOffConfirm
-    if [[ ${powerOffConfirm} == "y" || ${powerOffConfirm} == "Y" ]]; then
+    if [[ ${powerOffConfirm} =~ ^[yY]$ ]]; then
         adbDeviceIdsString=$(getAdbDeviceIdsString)
         fastbootDeviceIdsString=$(getFastbootDeviceIdsString)
         if [[ -n "${deviceId}" ]]; then
@@ -69,7 +71,7 @@ powerOffDeviceForDevice() {
             done < <(echo "${fastbootDeviceIdsString}" | tr -d '\r' | grep -v '^$')
         fi
         exit 0
-    elif [[ ${powerOffConfirm} == "n" || ${powerOffConfirm} == "N" ]]; then
+    elif [[ ${powerOffConfirm} =~ ^[nN]$ ]]; then
         echo "✅ 已取消关机操作"
         exit 0
     else

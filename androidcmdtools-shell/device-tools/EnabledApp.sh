@@ -3,15 +3,17 @@
 #     author   : Android 轮子哥
 #     github   : https://github.com/getActivity/AndroidCmdTools
 #      time    : 2026/01/25
-#      desc    : adb 解冻脚本（支持多包名解冻和多设备并行解冻）
+#      desc    : 应用状态恢复脚本（恢复禁用应用）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     echo "请输入要解冻应用包名（可输入多个，空格分隔）："

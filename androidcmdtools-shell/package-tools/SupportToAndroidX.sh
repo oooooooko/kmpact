@@ -5,24 +5,20 @@
 #      time    : 2026/01/25
 #      desc    : support 转 androidx
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" && \
+source "../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 main() {
     printCurrentSystemType
     checkJavaEnvironment
-
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        exit 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
 
     echo "请输入要转换 aar / jar / zip 包的路径："
     read -r supportFilePath
@@ -33,15 +29,25 @@ main() {
         exit 1
     fi
 
-    if [[ ! "${supportFilePath}" =~ \.(aar|jar|zip)$ ]]; then
+    if [[ ! "${supportFilePath}" =~ \.([Aa][Aa][Rr]|[Jj][Aa][Rr]|[Zz][Ii][Pp])$ ]]; then
         echo "❌ 文件错误，只支持文件名后缀为 aar / jar / zip 包的文件"
         exit 1
     fi
 
-    androidXFilePath="${supportFilePath%.*}-androidx-$(date "+%Y%m%d%H%M%S").${supportFilePath##*.}"
+    androidXFilePath="${supportFilePath%.*}-androidx.${supportFilePath##*.}"
+    androidxNameSuffix="-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${androidXFilePath}" ]]; then
+        androidXFilePath="${androidXFilePath%.*}${androidxNameSuffix}.${supportFilePath##*.}"
+    elif [[ -d "${androidXFilePath}" ]]; then
+        if [[ "$(find "${androidXFilePath}" -mindepth 1 | head -1)" ]]; then
+            androidXFilePath="${androidXFilePath%.*}${androidxNameSuffix}.${supportFilePath##*.}"
+        else
+            rmdir "${androidXFilePath}"
+        fi
+    fi
     echo "androidx 包的保存路径：${androidXFilePath}"
 
-    outputPrint="$("${resourcesDirPath}$(getFileSeparator)jetifier-standalone-20200827$(getFileSeparator)bin$(getFileSeparator)jetifier-standalone" -i "${supportFilePath}" -o "${androidXFilePath}" 2>&1)"
+    outputPrint="$("$(getJetifierStandaloneShellFilePath)" -i "${supportFilePath}" -o "${androidXFilePath}" 2>&1)"
     exitCode=$?
     if (( exitCode != 0 )); then
         echo "❌ 转换失败，原因如下："

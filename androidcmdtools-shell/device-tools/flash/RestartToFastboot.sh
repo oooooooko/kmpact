@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : 快速启动模式重启脚本（重启到 fastboot）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 rebootToFastboot() {
     local deviceId=$1
@@ -31,7 +33,7 @@ rebootToFastbootForDevices() {
     deviceId="$(inputMultipleAdbDevice)"
     echo "你确定要将设备重启到 fastboot 模式？（y/n）"
     read -r rebootFastbootConfirm
-    if [[ ${rebootFastbootConfirm} == "y" || ${rebootFastbootConfirm} == "Y" ]]; then
+    if [[ ${rebootFastbootConfirm} =~ ^[yY]$ ]]; then
         if [[ -n "${deviceId}" ]]; then
             rebootToFastboot "${deviceId}"
         else
@@ -41,7 +43,7 @@ rebootToFastbootForDevices() {
             done < <(echo "${adbDeviceIdsString}" | tr -d '\r' | grep -v '^$')
         fi
         exit 0
-    elif [[ ${rebootFastbootConfirm} == "n" || ${rebootFastbootConfirm} == "N" ]]; then
+    elif [[ ${rebootFastbootConfirm} =~ ^[nN]$ ]]; then
         echo "✅ 已取消关机操作"
         exit 0
     else

@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : 临时引导恢复脚本（fastboot boot recovery）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 isAbPartitionDevice() {
     # 获取current-slot值（仅保留a/b，屏蔽错误输出）
@@ -86,17 +87,17 @@ flashTempRecoveryForDevice() {
         return 1
     fi
 
-    if [[ ! "${recoveryFilePath}" =~ \.(img)$ ]]; then
+    if [[ ! "${recoveryFilePath}" =~ \.([Ii][Mm][Gg])$ ]]; then
         echo "❌ 文件错误，只接受文件名后缀为 img 的文件"
         exit 1
     fi
 
     echo "这是一个危险操作，你确定要给设备加载临时的 recovery ？（y/n）"
     read -r loadConfirm
-    if [[ "${loadConfirm}" == "n" || "${loadConfirm}" == "N" ]]; then
+    if [[ "${loadConfirm}" =~ ^[nN]$ ]]; then
         echo "✅ 用户手动取消操作"
         return 0
-    elif [[ "${loadConfirm}" != "y" && "${loadConfirm}" != "Y" ]]; then
+    elif [[ ! "${loadConfirm}" =~ ^[yY]$ ]]; then
         echo "❌ 无效选择，已取消操作"
         return 1
     fi
@@ -122,8 +123,8 @@ flashTempRecoveryForDevice() {
     echo "${outputPrint}"
     if echo "${outputPrint}" | grep -qi 'bad buffer size'; then
         echo "⏳ 匹配到 Bad Buffer Size 错误，准备切槽位再重试"
-        switchToAnotherSlot
         clearMiscPartition
+        switchToAnotherSlot
         outputPrint=$(fastboot boot "${recoveryFilePath}" < /dev/null 2>&1)
         exitCode=$?
         if (( exitCode == 0 )); then
@@ -132,6 +133,8 @@ flashTempRecoveryForDevice() {
         else
             echo "❌ 切换槽位后仍加载失败，最终失败原因："
             echo "${outputPrint}"
+            clearMiscPartition
+            switchToAnotherSlot
         fi
     else
         echo "📝 未匹配到 Bad Buffer Size 错误，错误内容不触发切槽位逻辑"

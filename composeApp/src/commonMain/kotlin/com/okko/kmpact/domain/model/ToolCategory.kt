@@ -82,7 +82,7 @@ object ToolCommands {
         name = "对APK进行签名",
         description = "使用keystore为APK签名",
         category = ToolCategory.PACKAGE_TOOLS,
-        scriptPath = "shell/package-tools/SignatureApk.sh",
+        scriptPath = "androidcmdtools-shell/package-tools/SignatureApk.sh",
         requiresInput = true
     )
     
@@ -91,7 +91,7 @@ object ToolCommands {
         name = "获取APK签名信息",
         description = "查看APK的签名详情",
         category = ToolCategory.PACKAGE_TOOLS,
-        scriptPath = "shell/package-tools/GetApkSignature.sh",
+        scriptPath = "androidcmdtools-shell/package-tools/GetApkSignature.sh",
         requiresInput = true
     )
     
@@ -100,7 +100,7 @@ object ToolCommands {
         name = "Support转AndroidX",
         description = "将Support库转换为AndroidX",
         category = ToolCategory.PACKAGE_TOOLS,
-        scriptPath = "shell/package-tools/SupportToAndroidX.sh",
+        scriptPath = "androidcmdtools-shell/package-tools/SupportToAndroidX.sh",
         requiresInput = true
     )
     
@@ -109,7 +109,7 @@ object ToolCommands {
         name = "AndroidX转Support",
         description = "将AndroidX转换为Support库",
         category = ToolCategory.PACKAGE_TOOLS,
-        scriptPath = "shell/package-tools/AndroidXToSupport.sh",
+        scriptPath = "androidcmdtools-shell/package-tools/AndroidXToSupport.sh",
         requiresInput = true
     )
     
@@ -118,7 +118,16 @@ object ToolCommands {
         name = "包体比较",
         description = "比较APK/AAR/JAR/AAB包体差异",
         category = ToolCategory.PACKAGE_TOOLS,
-        scriptPath = "shell/package-tools/CompareArchives.sh",
+        scriptPath = "androidcmdtools-shell/package-tools/CompareArchives.sh",
+        requiresInput = true
+    )
+    
+    val AAB_TO_APKS = ToolCommand(
+        id = "aab_to_apks",
+        name = "AAB转APKS",
+        description = "使用bundletool将AAB转换为APKS",
+        category = ToolCategory.PACKAGE_TOOLS,
+        scriptPath = "androidcmdtools-shell/package-tools/AabToApks.sh",
         requiresInput = true
     )
     
@@ -129,7 +138,7 @@ object ToolCommands {
         name = "安装应用",
         description = "安装APK到设备",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/InstallApk.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/InstallApp.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -139,7 +148,7 @@ object ToolCommands {
         name = "卸载应用",
         description = "从设备卸载应用",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/UninstallApp.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/UninstallApp.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -149,7 +158,7 @@ object ToolCommands {
         name = "保存截图到电脑",
         description = "截取设备屏幕并保存",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/SaveScreenshot.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/SaveScreenshot.sh",
         requiresDevice = true
     )
     
@@ -158,7 +167,7 @@ object ToolCommands {
         name = "保存录屏到电脑",
         description = "录制设备屏幕并保存",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/SaveScreenRecording.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/SaveScreenRecording.sh",
         requiresDevice = true
     )
     
@@ -167,7 +176,7 @@ object ToolCommands {
         name = "清除应用数据",
         description = "清除指定应用的数据",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ClearAppData.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ClearAppData.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -177,7 +186,7 @@ object ToolCommands {
         name = "杀死应用进程",
         description = "强制停止应用进程",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/KillAppProcess.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/KillAppProcess.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -187,7 +196,7 @@ object ToolCommands {
         name = "查看设备Logcat",
         description = "实时查看设备日志",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/DisplayLogcat.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/DisplayLogcat.sh",
         requiresDevice = true
     )
     
@@ -196,7 +205,7 @@ object ToolCommands {
         name = "导出应用APK",
         description = "从设备导出已安装的APK",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ExportApkFile.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ExportApkFile.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -206,7 +215,7 @@ object ToolCommands {
         name = "设备重启",
         description = "重启Android设备",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/hardware/DeviceRestart.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/hardware/DeviceRestart.sh",
         requiresDevice = true
     )
     
@@ -215,7 +224,7 @@ object ToolCommands {
         name = "设备关机",
         description = "关闭Android设备",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/hardware/PowerOffDevice.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/hardware/PowerOffDevice.sh",
         requiresDevice = true
     )
     
@@ -224,7 +233,7 @@ object ToolCommands {
         name = "连接无线ADB",
         description = "通过WiFi连接设备",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ConnectWirelessAdb.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ConnectWirelessAdb.sh",
         requiresDevice = true
     )
     
@@ -233,7 +242,7 @@ object ToolCommands {
         name = "断开无线ADB",
         description = "断开WiFi连接的设备",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/DisconnectWirelessAdb.sh"
+        scriptPath = "androidcmdtools-shell/device-tools/DisconnectWirelessAdb.sh"
     )
     
     val GRANT_PERMISSION = ToolCommand(
@@ -241,7 +250,7 @@ object ToolCommands {
         name = "授予应用权限",
         description = "授予应用指定权限",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/GrantPermission.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/GrantPermission.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -251,7 +260,7 @@ object ToolCommands {
         name = "撤销应用权限",
         description = "撤销应用指定权限",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/RevokePermission.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/RevokePermission.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -261,7 +270,7 @@ object ToolCommands {
         name = "启用应用",
         description = "启用被禁用的应用",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/EnabledApp.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/EnabledApp.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -271,7 +280,7 @@ object ToolCommands {
         name = "禁用应用",
         description = "禁用指定应用",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/DisabledApp.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/DisabledApp.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -281,7 +290,7 @@ object ToolCommands {
         name = "设置全局代理",
         description = "设置设备全局HTTP代理",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/SetGlobalProxy.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/SetGlobalProxy.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -291,7 +300,7 @@ object ToolCommands {
         name = "清除全局代理",
         description = "清除设备全局代理设置",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ClearGlobalProxy.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ClearGlobalProxy.sh",
         requiresDevice = true
     )
     
@@ -300,7 +309,7 @@ object ToolCommands {
         name = "获取屏幕信息",
         description = "查看设备屏幕分辨率等信息",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/GetScreenInfo.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/GetScreenInfo.sh",
         requiresDevice = true
     )
     
@@ -309,7 +318,7 @@ object ToolCommands {
         name = "查看设备CPU架构",
         description = "查看设备CPU架构和ABI信息",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/GetDeviceCpuAbi.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/GetDeviceCpuAbi.sh",
         requiresDevice = true
     )
     
@@ -318,7 +327,7 @@ object ToolCommands {
         name = "获取顶层Activity",
         description = "查看当前顶层Activity信息",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/GetTopActivityContent.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/GetTopActivityContent.sh",
         requiresDevice = true
     )
     
@@ -327,7 +336,7 @@ object ToolCommands {
         name = "导出ANR日志",
         description = "导出应用ANR崩溃日志",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ExportAnrFile.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ExportAnrFile.sh",
         requiresDevice = true
     )
     
@@ -336,7 +345,7 @@ object ToolCommands {
         name = "管理设备文件",
         description = "浏览和管理设备文件系统",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/ManageFile.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/ManageFile.sh",
         requiresDevice = true
     )
     
@@ -345,7 +354,7 @@ object ToolCommands {
         name = "运行Monkey测试",
         description = "执行随机压力测试",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/RunMonkeyTest.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/RunMonkeyTest.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -357,7 +366,7 @@ object ToolCommands {
         name = "点击屏幕",
         description = "模拟点击屏幕指定坐标",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/ClickTheScreen.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/ClickTheScreen.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -367,7 +376,7 @@ object ToolCommands {
         name = "输入文本",
         description = "模拟输入文本内容",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/InputText.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/InputText.sh",
         requiresDevice = true,
         requiresInput = true
     )
@@ -377,7 +386,7 @@ object ToolCommands {
         name = "按返回键",
         description = "模拟按下返回键",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/PressBackKey.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/PressBackKey.sh",
         requiresDevice = true
     )
     
@@ -386,7 +395,7 @@ object ToolCommands {
         name = "按Home键",
         description = "模拟按下Home键",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/PressHomeKey.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/PressHomeKey.sh",
         requiresDevice = true
     )
     
@@ -395,7 +404,7 @@ object ToolCommands {
         name = "按菜单键",
         description = "模拟按下菜单键",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/PressMenuKey.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/PressMenuKey.sh",
         requiresDevice = true
     )
     
@@ -404,7 +413,7 @@ object ToolCommands {
         name = "按电源键",
         description = "模拟按下电源键",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/PressPowerKey.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/PressPowerKey.sh",
         requiresDevice = true
     )
     
@@ -413,7 +422,7 @@ object ToolCommands {
         name = "按任务键",
         description = "模拟按下任务切换键",
         category = ToolCategory.DEVICE_TOOLS,
-        scriptPath = "shell/device-tools/simulation/PressTaskKey.sh",
+        scriptPath = "androidcmdtools-shell/device-tools/simulation/PressTaskKey.sh",
         requiresDevice = true
     )
     
@@ -424,7 +433,7 @@ object ToolCommands {
         name = "用apktool反编译APK",
         description = "反编译APK到smali代码",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/apktool/DecompileApk.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/apktool/DecompileApk.sh",
         requiresInput = true
     )
     
@@ -433,7 +442,7 @@ object ToolCommands {
         name = "用apktool回编译APK",
         description = "从smali代码回编译APK",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/apktool/RecompileApk.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/apktool/RecompileApk.sh",
         requiresInput = true
     )
     
@@ -442,7 +451,7 @@ object ToolCommands {
         name = "用jadx查看包体",
         description = "使用jadx查看APK源码",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/jadx/JadxView.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/jadx/JadxView.sh",
         requiresInput = true
     )
     
@@ -451,7 +460,7 @@ object ToolCommands {
         name = "用jd-gui查看包体",
         description = "使用jd-gui查看JAR源码",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/jd-gui/JdGuiView.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/jd-gui/JdGuiView.sh",
         requiresInput = true
     )
     
@@ -460,7 +469,7 @@ object ToolCommands {
         name = "dex转jar",
         description = "将dex文件转换为jar",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/jar-dex/DexToJar.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/jar-dex/DexToJar.sh",
         requiresInput = true
     )
     
@@ -469,7 +478,7 @@ object ToolCommands {
         name = "jar转dex",
         description = "将jar文件转换为dex",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/jar-dex/JarToDex.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/jar-dex/JarToDex.sh",
         requiresInput = true
     )
     
@@ -478,7 +487,7 @@ object ToolCommands {
         name = "dex转smali",
         description = "将dex文件转换为smali代码",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/dex-smali/DexToSmali.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/dex-smali/DexToSmali.sh",
         requiresInput = true
     )
     
@@ -487,7 +496,7 @@ object ToolCommands {
         name = "smali转dex",
         description = "将smali代码转换为dex",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/dex-smali/SmaliToDex.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/dex-smali/SmaliToDex.sh",
         requiresInput = true
     )
     
@@ -496,7 +505,7 @@ object ToolCommands {
         name = "dex转class",
         description = "将dex文件转换为class文件",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/dex-class/DexToClass.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/dex-class/DexToClass.sh",
         requiresInput = true
     )
     
@@ -505,7 +514,7 @@ object ToolCommands {
         name = "class转dex",
         description = "将class文件转换为dex",
         category = ToolCategory.REVERSE_TOOLS,
-        scriptPath = "shell/reverse-tools/convert/dex-class/ClassToDex.sh",
+        scriptPath = "androidcmdtools-shell/reverse-tools/convert/dex-class/ClassToDex.sh",
         requiresInput = true
     )
     
@@ -516,7 +525,7 @@ object ToolCommands {
         name = "创建SSH密钥",
         description = "生成新的SSH密钥对",
         category = ToolCategory.KEY_TOOLS,
-        scriptPath = "shell/ssh-key-tools/CreateSshKey.sh",
+        scriptPath = "androidcmdtools-shell/ssh-key-tools/CreateSshKey.sh",
         requiresInput = true
     )
     
@@ -525,7 +534,7 @@ object ToolCommands {
         name = "删除SSH密钥",
         description = "删除指定的SSH密钥",
         category = ToolCategory.KEY_TOOLS,
-        scriptPath = "shell/ssh-key-tools/DeleteSshKey.sh",
+        scriptPath = "androidcmdtools-shell/ssh-key-tools/DeleteSshKey.sh",
         requiresInput = true
     )
     
@@ -534,7 +543,7 @@ object ToolCommands {
         name = "查询SSH公钥",
         description = "查看SSH公钥内容",
         category = ToolCategory.KEY_TOOLS,
-        scriptPath = "shell/ssh-key-tools/QuerySshPublicKey.sh"
+        scriptPath = "androidcmdtools-shell/ssh-key-tools/QuerySshPublicKey.sh"
     )
     
     val OPEN_SSH_KEY_DIR = ToolCommand(
@@ -542,18 +551,11 @@ object ToolCommands {
         name = "打开SSH密钥目录",
         description = "在文件管理器中打开.ssh目录",
         category = ToolCategory.KEY_TOOLS,
-        scriptPath = "shell/ssh-key-tools/OpenSshKeyDir.sh"
+        scriptPath = "androidcmdtools-shell/ssh-key-tools/OpenSshKeyDir.sh"
     )
     
     // ========== 开发类工具 ==========
-    
-    val JSON_BEAUTIFY = ToolCommand(
-        id = "json_beautify",
-        name = "Json美化",
-        description = "格式化和美化JSON数据",
-        category = ToolCategory.DEV_TOOLS,
-        requiresInput = true
-    )
+
     
     val REGEX_CHEATSHEET = ToolCommand(
         id = "regex_cheatsheet",
@@ -621,6 +623,7 @@ object ToolCommands {
         SUPPORT_TO_ANDROIDX,
         ANDROIDX_TO_SUPPORT,
         COMPARE_PACKAGE,
+        AAB_TO_APKS,
         
         // 设备工具 - 基础操作
         INSTALL_APK,
@@ -678,7 +681,6 @@ object ToolCommands {
         OPEN_SSH_KEY_DIR,
         
         // 开发类工具
-        JSON_BEAUTIFY,
         REGEX_CHEATSHEET,
         ENCODING_CONVERTER,
         TIMESTAMP_CONVERTER,

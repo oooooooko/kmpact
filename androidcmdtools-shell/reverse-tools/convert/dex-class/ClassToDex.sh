@@ -5,26 +5,22 @@
 #      time    : 2026/01/25
 #      desc    : Class 转 Dex 脚本（打包 class 为 dex）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../../common/FileTools.sh"
-source "${scriptDirPath}/../../../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../../common/SystemPlatform.sh" && \
+source "../../../common/EnvironmentTools.sh" && \
+source "../../../common/FileTools.sh" && \
+source "../../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 main() {
     printCurrentSystemType
     checkJavaEnvironment
     checkJarEnvironment
     jarCmd=$(getJarCmd)
-
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        exit 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
 
     echo "请输入 .class 文件所在目录或单个 .class 文件路径"
     read -r inputPath
@@ -41,7 +37,7 @@ main() {
         echo "中间 jar 路径：${tempJar}"
         outputPrint=$("${jarCmd}" cf "${tempJar}" -C "${classesDirPath}" . 2>&1)
     elif [[ -f "${inputPath}" ]]; then
-        if [[ ! "${inputPath}" =~ \.(class)$ ]]; then
+        if [[ ! "${inputPath}" =~ \.([Cc][Ll][Aa][Ss][Ss])$ ]]; then
             echo "❌ 文件错误，只支持文件名后缀为 class 的文件"
             exit 1
         fi
@@ -63,11 +59,21 @@ main() {
     fi
 
     if [[ -d "${inputPath}" ]]; then
-        outputDex="${classesDirPath%/}-class2dex-$(date "+%Y%m%d%H%M%S").dex"
+        outputDex="${classesDirPath%/}.dex"
     else
-        outputDex="${inputPath%.*}-class2dex-$(date "+%Y%m%d%H%M%S").dex"
+        outputDex="${inputPath%.*}.dex"
     fi
-    outputPrint="$("${resourcesDirPath}$(getFileSeparator)dex2jar-2.4$(getFileSeparator)d2j-jar2dex.sh" -f -o "${outputDex}" "${tempJar}" 2>&1)"
+    class2dexNameSuffix="-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${outputDex}" ]]; then
+        outputDex="${outputDex%.*}${class2dexNameSuffix}.dex"
+    elif [[ -d "${outputDex}" ]]; then
+        if [[ "$(find "${outputDex}" -mindepth 1 | head -1)" ]]; then
+            outputDex="${outputDex%.*}${class2dexNameSuffix}.dex"
+        else
+            rmdir "${outputDex}"
+        fi
+    fi
+    outputPrint="$("$(getJarToDexShellDirPath)" -f -o "${outputDex}" "${tempJar}" 2>&1)"
     exitCode=$?
     rm -f "${tempJar}"
     if (( exitCode != 0 )) || [[ ! -f "${outputDex}" ]]; then

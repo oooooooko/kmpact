@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : SSH 密钥创建脚本（生成并配置密钥）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
-[ -z "" ] || source "../common/PasteTools.sh"
-source "${scriptDirPath}/../common/PasteTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" && \
+source "../common/PasteTools.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 KEY_TYPE_ED25519="ed25519"
 KEY_TYPE_RSA="rsa"
@@ -116,7 +117,7 @@ createSshKeyFiles() {
 
     echo "是否将新创建的公钥内容复制到剪贴板？（y/n）"
     read -r copyConfirm
-    if [[ "${copyConfirm}" == "y" || "${copyConfirm}" == "Y" ]]; then
+    if [[ "${copyConfirm}" =~ ^[yY]$ ]]; then
         if copyTextFileToPaste "${keyPath}.pub"; then
             echo "✅ 公钥内容已复制到剪贴板"
         else

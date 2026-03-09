@@ -5,17 +5,18 @@
 #      time    : 2026/01/25
 #      desc    : 输入文本脚本（模拟在设备上输入文本）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
-[ -z "" ] || source "../../common/PasteTools.sh"
-source "${scriptDirPath}/../../common/PasteTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../common/PasteTools.sh" && \
+source "../../business/DevicesSelector.sh" && \
+source "../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 ADB_KEY_BOARD_PACKAGE="com.android.adbkeyboard"
 ADB_KEY_BOARD_COMPONENT="${ADB_KEY_BOARD_PACKAGE}/.AdbIME"
@@ -100,14 +101,8 @@ isInstallAdbKeyBoard() {
 
 installAdbKeyBoard() {
     local deviceId=$1
-    local resourcesDirPath
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        return 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
-    local apkFilePath="${resourcesDirPath}/ADBKeyBoard-5.0.apk"
+    local apkFilePath
+    apkFilePath="$(getADBKeyBoardApkFilePath)"
     if [[ ! -f "${apkFilePath}" ]]; then
         echo "❌ 找不到 ADBKeyBoard 安装包：${apkFilePath}"
         return 1
@@ -446,14 +441,14 @@ checkInstallAdbKeyBoard() {
         echo "🤔 检测到 [${adbDeviceId}] 设备 ADBKeyBoard 还未安装，请问是否安装？（y/n）"
         while true; do
             read -r installConfirm
-            if [[ "${installConfirm}" == "y" || "${installConfirm}" == "Y" ]]; then
+            if [[ "${installConfirm}" =~ ^[yY]$ ]]; then
                 installAdbKeyBoard "${adbDeviceId}"
                 local exitCode=$?
                 if (( exitCode != 0 )); then
                     exit ${exitCode}
                 fi
                 break
-            elif [[ "${installConfirm}" == "n" || "${installConfirm}" == "N" ]]; then
+            elif [[ "${installConfirm}" =~ ^[nN]$ ]]; then
                 echo "✅ 用户手动取消安装"
                 exit 0
             else
@@ -499,7 +494,7 @@ inputTextForDevice() {
 
     while true; do
         read -r focusConfirm
-        if [[ "${focusConfirm}" == "y" || "${focusConfirm}" == "Y" ]]; then
+        if [[ "${focusConfirm}" =~ ^[yY]$ ]]; then
             local pids=()
             for adbDeviceId in "${adbDeviceList[@]}"; do
                 inputTextSingleDevice "${adbDeviceId}" "${inputText}" "${needAdbKeyboard}" &
@@ -515,7 +510,7 @@ inputTextForDevice() {
                 echo "✅ 当前设备的文本输入任务已完成"
             fi
             break
-        elif [[ "${focusConfirm}" == "n" || "${focusConfirm}" == "N" ]]; then
+        elif [[ "${focusConfirm}" =~ ^[nN]$ ]]; then
             disabledAdbKeyBoard
             echo "✅ 用户选择不获取焦点，无法进行下一步，取消操作"
             break

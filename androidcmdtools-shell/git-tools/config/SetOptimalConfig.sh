@@ -5,17 +5,17 @@
 #      time    : 2026/01/31
 #      desc    : Git 配置一键优化脚本
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/GitTools.sh"
-source "${scriptDirPath}/../../business/GitTools.sh"
-[ -z "" ] || source "../../business/GitSelector.sh"
-source "${scriptDirPath}/../../business/GitSelector.sh"
-[ -z "" ] || source "../../business/GitProperties.sh"
-source "${scriptDirPath}/../../business/GitProperties.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/GitTools.sh" && \
+source "../../business/GitSelector.sh" && \
+source "../../business/GitProperties.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     echo "🤔 请选择生效的范围："
@@ -56,7 +56,7 @@ waitUserInputParameter() {
     fi
     while true; do
         read -r configConfirm
-        if [[ "${configConfirm}" == "y" || "${configConfirm}" == "Y" ]]; then
+        if [[ "${configConfirm}" =~ ^[yY]$ ]]; then
             setOptimalConfig
             if [[ -n "${repositoryDirPath}" ]]; then
                 echo "✅ 仓库 Git 最佳配置完成"
@@ -64,7 +64,7 @@ waitUserInputParameter() {
                 echo "✅ 全局 Git 最佳配置完成"
             fi
             break
-        elif [[ "${configConfirm}" == "n" || "${configConfirm}" == "N" ]]; then
+        elif [[ "${configConfirm}" =~ ^[nN]$ ]]; then
             echo "✅ 用户手动取消操作"
             break
         else

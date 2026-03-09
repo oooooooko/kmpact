@@ -5,10 +5,8 @@
 #      time    : 2026/01/25
 #      desc    : Git 选择器脚本
 # ----------------------------------------------------------------------
-[ -z "" ] || source "/GitTools.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/GitTools.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../common/FileTools.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/GitTools.sh" || source "GitTools.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/../common/FileTools.sh" || source "../common/FileTools.sh"
 
 selectLocalRepositoryPath() {
     echo "请输入 Git 仓库目录路径" >&2

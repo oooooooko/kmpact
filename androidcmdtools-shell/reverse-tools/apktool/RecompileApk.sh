@@ -5,18 +5,18 @@
 #      time    : 2026/01/25
 #      desc    : 用 apktool 回编译 apk
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
-    resourcesDirPath=$(getResourcesDirPath)
-    echo "资源目录为：${resourcesDirPath}"
-
     echo "请输入要回编译的 apk 源目录路径（即反编译后的目录）"
     read -r sourceDirPath
     sourceDirPath=$(parseComputerFilePath "${sourceDirPath}")
@@ -31,34 +31,38 @@ waitUserInputParameter() {
     outputApkFilePath=$(parseComputerFilePath "${outputApkFilePath}")
 
     if [[ -z "${outputApkFilePath}" ]]; then
-        base="${sourceDirPath%/}"
-        outputApkFilePath="${base}-recompile-$(date "+%Y%m%d%H%M%S").apk"
-    else
-        # 确保输出文件有.apk扩展名
-        if [[ ! "${outputApkFilePath}" =~ \.apk$ ]]; then
-            outputApkFilePath="${outputApkFilePath}.apk"
-        fi
-        
-        # 如果文件已存在，警告用户
-        if [[ -f "${outputApkFilePath}" ]]; then
-            echo "⚠️  警告：文件 ${outputApkFilePath} 已存在"
-            echo "   使用 -f 参数会覆盖该文件！"
-            echo "   是否继续？(y/n)"
-            read -r confirm
-            if [[ "${confirm}" != "y" && "${confirm}" != "Y" ]]; then
-                echo "❌ 用户取消操作"
-                exit 1
+        outputApkFilePath="${sourceDirPath%/}.apk"
+    fi
+
+    recompileApkNameSuffix="-recompile-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${outputApkFilePath}" ]]; then
+        echo "该文件已经存在，是否覆盖原有内容？（y/n）"
+        while true; do
+            read -r rewriteConfirm
+            if [[ "${rewriteConfirm}" =~ ^[yY]$ ]]; then
+                break
+            elif [[ "${rewriteConfirm}" =~ ^[nN]$ ]]; then
+                outputApkFilePath="${outputApkFilePath%.*}${recompileApkNameSuffix}.apk"
+                break
+            else
+                echo "👻 输入不正确，请输入正确的选项（y/n）"
+                continue
             fi
+        done
+    elif [[ -d "${outputApkFilePath}" ]]; then
+        if [[ "$(find "${outputApkFilePath}" -mindepth 1 | head -1)" ]]; then
+            outputApkFilePath="${outputApkFilePath%.*}${recompileApkNameSuffix}.apk"
+        else
+            rmdir "${outputApkFilePath}"
         fi
     fi
 
-    local apktoolJarFileName="apktool-2.12.1.jar"
-    echo "请输入 apktool jar 包的路径（可为空，默认使用 ${apktoolJarFileName}）"
+    echo "请输入 apktool jar 包的路径（可为空）"
     read -r apktoolJarFilePath
     apktoolJarFilePath=$(parseComputerFilePath "${apktoolJarFilePath}")
 
     if [[ -z "${apktoolJarFilePath}" ]]; then
-        apktoolJarFilePath="${resourcesDirPath}$(getFileSeparator)${apktoolJarFileName}"
+        apktoolJarFilePath=$(getApktoolJarFilePath)
     fi
 
     if [[ ! -f "${apktoolJarFilePath}" ]]; then
@@ -66,7 +70,7 @@ waitUserInputParameter() {
         exit 1
     fi
 
-    if [[ ! "${apktoolJarFilePath}" =~ \.(jar)$ ]]; then
+    if [[ ! "${apktoolJarFilePath}" =~ \.([Jj][Aa][Rr])$ ]]; then
         echo "❌ 文件错误，apktool 文件名后缀只能是 jar 结尾"
         exit 1
     fi
@@ -91,11 +95,29 @@ recompileApk() {
     echo "✅ 回编译 apk 完成，输出文件：${outputApkFilePath}"
 }
 
+signatureApk() {
+    echo "是否要对回编译输出的 apk 进行签名？（y/n）"
+    while true; do
+        read -r signConfirm
+        if [[ "${signConfirm}" =~ ^[yY]$ ]]; then
+            selfDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+            bash "${selfDir}/../../package-tools/SignatureApk.sh" "${outputApkFilePath}"
+            break
+        elif [[ "${signConfirm}" =~ ^[nN]$ ]]; then
+            break
+        else
+            echo "👻 输入不正确，请输入正确的选项（y/n）"
+            continue
+        fi
+    done
+}
+
 main() {
     printCurrentSystemType
     checkJavaEnvironment
     waitUserInputParameter
     recompileApk
+    signatureApk
 }
 
 clear

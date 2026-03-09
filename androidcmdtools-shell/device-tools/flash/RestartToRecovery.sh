@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : 恢复模式重启脚本（重启到 recovery）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 rebootToRecoveryByAdb() {
     local deviceId=$1
@@ -48,7 +50,7 @@ rebootToRecoveryForDevice() {
     deviceId="$(inputMultipleDevice)"
     echo "你确定要将设备重启到 recovery 模式？（y/n）"
     read -r rebootRecoveryConfirm
-    if [[ ${rebootRecoveryConfirm} == "y" || ${rebootRecoveryConfirm} == "Y" ]]; then
+    if [[ ${rebootRecoveryConfirm} =~ ^[yY]$ ]]; then
         if [[ -n "${deviceId}" ]]; then
             adbDeviceIdsString=$(getAdbDeviceIdsString)
             fastbootDeviceIdsString=$(getFastbootDeviceIdsString)
@@ -67,7 +69,7 @@ rebootToRecoveryForDevice() {
                 rebootToRecoveryByFastboot "${fastbootDeviceId}"
             done < <(echo "${fastbootDeviceIdsString}" | tr -d '\r' | grep -v '^$')
         fi
-    elif [[ ${rebootRecoveryConfirm} == "n" || ${rebootRecoveryConfirm} == "N" ]]; then
+    elif [[ ${rebootRecoveryConfirm} =~ ^[nN]$ ]]; then
         echo "✅ 已取消操作"
     else
         echo "❌ 输入错误，取消操作"

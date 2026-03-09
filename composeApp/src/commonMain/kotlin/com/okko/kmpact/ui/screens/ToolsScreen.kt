@@ -512,6 +512,15 @@ private fun PackageToolsParameters(
                 allowedExtensions = listOf("apk", "aar", "jar", "aab")
             )
         }
+        "aab_to_apks" -> {
+            FileInputField(
+                label = "AAB文件路径",
+                value = parameters["aabPath"] ?: "",
+                onValueChange = { onParameterChange("aabPath", it) },
+                placeholder = "选择或输入AAB文件路径",
+                allowedExtensions = listOf("aab")
+            )
+        }
         else -> {
             FileInputField(
                 label = "文件路径",
@@ -917,7 +926,6 @@ private fun DevToolsPlaceholder(
     }
     
     when (command.id) {
-        "json_beautify" -> JsonBeautifyComponent()
         "regex_cheatsheet" -> RegexCheatsheetComponent()
         "encoding_converter" -> EncodingConverterComponent()
         "timestamp_converter" -> TimestampConverterComponent()

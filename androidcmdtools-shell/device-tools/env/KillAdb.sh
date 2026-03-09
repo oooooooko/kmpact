@@ -5,21 +5,23 @@
 #      time    : 2026/01/25
 #      desc    : adb 进程杀死脚本（停止服务器）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../common/ProcessTools.sh"
-source "${scriptDirPath}/../../common/ProcessTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../common/ProcessTools.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 killAdbProcess() {
     echo "确定要杀死 adb 进程? （y/n）"
     while true; do
         read -r killConfirm
-        if [[ "${killConfirm}" == "y" || "${killConfirm}" == "Y" ]]; then
+        if [[ "${killConfirm}" =~ ^[yY]$ ]]; then
             break
-        elif [[ "${killConfirm}" == "n" || "${killConfirm}" == "N" ]]; then
+        elif [[ "${killConfirm}" =~ ^[nN]$ ]]; then
             echo "✅ 用户手动取消操作"
             return 0
         else

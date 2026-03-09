@@ -5,18 +5,26 @@
 #      time    : 2026/01/25
 #      desc    : Apk 签名脚本（使用 keystore 为 apk 签名）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" && \
+source "../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
-    echo "请输入要进行签名的 apk 文件或所在目录路径："
-    read -r sourcePath
-    sourcePath=$(parseComputerFilePath "${sourcePath}")
+    local sourcePath=$1
+    if [[ -f "${sourcePath}" ]]; then
+        sourcePath=$(parseComputerFilePath "${sourcePath}")
+    else
+        echo "请输入要进行签名的 apk 文件或所在目录路径："
+        read -r sourcePath
+        sourcePath=$(parseComputerFilePath "${sourcePath}")
+    fi
     if [[ -z "${sourcePath}" ]]; then
         echo "❌ 路径为空，请检查输入是否正确"
         exit 1
@@ -25,13 +33,13 @@ waitUserInputParameter() {
     if [[ -d "${sourcePath}" ]]; then
         while IFS= read -r -d '' file; do
             apkFiles+=("${file}")
-        done < <(find "${sourcePath}" -maxdepth 1 -type f -name "*.apk" -print0)
+        done < <(find "${sourcePath}" -maxdepth 1 -type f -iname "*.apk" -print0)
         if (( ${#apkFiles[@]} == 0 )); then
             echo "❌ 该目录下没有以 .apk 结尾的文件，签名中止"
             exit 1
         fi
     elif [[ -f "${sourcePath}" ]]; then
-        if [[ ! "${sourcePath}" =~ \.(apk)$ ]]; then
+        if [[ ! "${sourcePath}" =~ \.([Aa][Pp][Kk])$ ]]; then
             echo "❌ 文件错误，只接受文件名后缀为 apk 的文件"
             exit 1
         fi
@@ -41,19 +49,13 @@ waitUserInputParameter() {
         exit 1
     fi
 
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        exit 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
     echo "是否使用默认的签名配置进行签名？(y/n)，留空则默认使用"
     read -r oneKeySignature
     if [[ -z "${oneKeySignature}" ]]; then
         oneKeySignature="y"
     fi
-    if [[ "${oneKeySignature}" = "y" || "${oneKeySignature}" = "Y" ]]; then
-        storeFilePath="${resourcesDirPath}$(getFileSeparator)signatureFile$(getFileSeparator)AppSignature.jks"
+    if [[ "${oneKeySignature}" =~ ^[yY]$ ]]; then
+        storeFilePath=$(getDefaultStoreFilePath)
         apkSignerJarFilePath=""
     else
         echo "请输入 apksigner jar 包的路径（可为空）"
@@ -85,7 +87,7 @@ waitUserInputParameter() {
         read -r keyPassword
     fi
     if [[ -z "${apkSignerJarFilePath}" ]]; then
-        apkSignerJarFilePath="${resourcesDirPath}$(getFileSeparator)apksigner-36.0.0.jar"
+        apkSignerJarFilePath="$(getApksignerJarFilePath)"
     fi
     if [[ ! -f "${storeFilePath}" ]]; then
         echo "❌ 密钥库文件不存在，请检查 ${storeFilePath} 文件路径是否正确"
@@ -95,21 +97,21 @@ waitUserInputParameter() {
         echo "❌ 文件不存在，请检查 ${apkSignerJarFilePath} 文件路径是否正确"
         exit 1
     fi
-    if [[ ! "${apkSignerJarFilePath}" =~ \.(jar)$ ]]; then
+    if [[ ! "${apkSignerJarFilePath}" =~ \.([Jj][Aa][Rr])$ ]]; then
         echo "❌ 文件错误，apksigner 文件名后缀只能是 jar 结尾"
         exit 1
     fi
 
-    echo "签名后是否直接覆盖原文件？（y/n），留空则默认不覆盖"
+    echo "签名后是否直接覆盖原文件？（y/n），留空则默认覆盖"
     while true; do
         read -r overwriteSourceFileConfirm
         if [[ -z "${overwriteSourceFileConfirm}" ]]; then
-            overwriteSourceFile="false"
-            break
-        elif [[ "${overwriteSourceFileConfirm}" == "y" || "${overwriteSourceFileConfirm}" == "Y" ]]; then
             overwriteSourceFile="true"
             break
-        elif [[ "${overwriteSourceFileConfirm}" == "n" || "${overwriteSourceFileConfirm}" == "N" ]]; then
+        elif [[ "${overwriteSourceFileConfirm}" =~ ^[yY]$ ]]; then
+            overwriteSourceFile="true"
+            break
+        elif [[ "${overwriteSourceFileConfirm}" =~ ^[nN]$ ]]; then
             overwriteSourceFile="false"
             break
         else
@@ -124,10 +126,10 @@ waitUserInputParameter() {
         if [[ -z "${customSigningSchemeConfirm}" ]]; then
             customSigningScheme="false"
             break
-        elif [[ "${customSigningSchemeConfirm}" == "y" || "${customSigningSchemeConfirm}" == "Y" ]]; then
+        elif [[ "${customSigningSchemeConfirm}" =~ ^[yY]$ ]]; then
             customSigningScheme="true"
             break
-        elif [[ "${customSigningSchemeConfirm}" == "n" || "${customSigningSchemeConfirm}" == "N" ]]; then
+        elif [[ "${customSigningSchemeConfirm}" =~ ^[nN]$ ]]; then
             customSigningScheme="false"
             break
         else
@@ -143,10 +145,10 @@ waitUserInputParameter() {
     echo "是否使用 v1 进行签名？（y/n）"
     while true; do
         read -r v1SigningSchemeConfirm
-        if [[ "${v1SigningSchemeConfirm}" == "y" || "${v1SigningSchemeConfirm}" == "Y" ]]; then
+        if [[ "${v1SigningSchemeConfirm}" =~ ^[yY]$ ]]; then
             v1SigningScheme="true"
             break
-        elif [[ "${v1SigningSchemeConfirm}" == "n" || "${v1SigningSchemeConfirm}" == "N" ]]; then
+        elif [[ "${v1SigningSchemeConfirm}" =~ ^[nN]$ ]]; then
             v1SigningScheme="false"
             break
         else
@@ -158,10 +160,10 @@ waitUserInputParameter() {
     echo "是否使用 v2 进行签名？（y/n）"
     while true; do
         read -r v2SigningSchemeConfirm
-        if [[ "${v2SigningSchemeConfirm}" == "y" || "${v2SigningSchemeConfirm}" == "Y" ]]; then
+        if [[ "${v2SigningSchemeConfirm}" =~ ^[yY]$ ]]; then
             v2SigningScheme="true"
             break
-        elif [[ "${v2SigningSchemeConfirm}" == "n" || "${v2SigningSchemeConfirm}" == "N" ]]; then
+        elif [[ "${v2SigningSchemeConfirm}" =~ ^[nN]$ ]]; then
             v2SigningScheme="false"
             break
         else
@@ -173,10 +175,10 @@ waitUserInputParameter() {
     echo "是否使用 v3 进行签名？（y/n）"
     while true; do
         read -r v3SigningSchemeConfirm
-        if [[ "${v3SigningSchemeConfirm}" == "y" || "${v3SigningSchemeConfirm}" == "Y" ]]; then
+        if [[ "${v3SigningSchemeConfirm}" =~ ^[yY]$ ]]; then
             v3SigningScheme="true"
             break
-        elif [[ "${v3SigningSchemeConfirm}" == "n" || "${v3SigningSchemeConfirm}" == "N" ]]; then
+        elif [[ "${v3SigningSchemeConfirm}" =~ ^[nN]$ ]]; then
             v3SigningScheme="false"
             break
         else
@@ -188,10 +190,10 @@ waitUserInputParameter() {
     echo "是否使用 v4 进行签名？（y/n）"
     while true; do
         read -r v4SigningSchemeConfirm
-        if [[ "${v4SigningSchemeConfirm}" == "y" || "${v4SigningSchemeConfirm}" == "Y" ]]; then
+        if [[ "${v4SigningSchemeConfirm}" =~ ^[yY]$ ]]; then
             v4SigningScheme="true"
             break
-        elif [[ "${v4SigningSchemeConfirm}" == "n" || "${v4SigningSchemeConfirm}" == "N" ]]; then
+        elif [[ "${v4SigningSchemeConfirm}" =~ ^[nN]$ ]]; then
             v4SigningScheme="false"
             break
         else
@@ -262,9 +264,9 @@ signatureApkInParallel() {
 main() {
     printCurrentSystemType
     checkJavaEnvironment
-    waitUserInputParameter
+    waitUserInputParameter "$1"
     signatureApkInParallel
 }
 
 clear
-main
+main "$@"

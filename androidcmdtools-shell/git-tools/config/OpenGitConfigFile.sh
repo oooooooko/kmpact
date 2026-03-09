@@ -5,17 +5,17 @@
 #      time    : 2026/01/31
 #      desc    : 打开 Git 配置文件脚本
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/GitTools.sh"
-source "${scriptDirPath}/../../business/GitTools.sh"
-[ -z "" ] || source "../../business/GitSelector.sh"
-source "${scriptDirPath}/../../business/GitSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/GitTools.sh" && \
+source "../../business/GitSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     echo "请选择要打开的配置文件（可空，留空则默认打开全局配置文件）："

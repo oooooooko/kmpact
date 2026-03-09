@@ -5,24 +5,20 @@
 #      time    : 2026/01/25
 #      desc    : Dex 转 Smali 脚本（baksmali 反汇编）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../../common/FileTools.sh"
-source "${scriptDirPath}/../../../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../../common/SystemPlatform.sh" && \
+source "../../../common/EnvironmentTools.sh" && \
+source "../../../common/FileTools.sh" && \
+source "../../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 main() {
     printCurrentSystemType
     checkJavaEnvironment
-
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        exit 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
 
     echo "请输入要反汇编的 dex/apk 文件路径"
     read -r inputDexFilePath
@@ -33,24 +29,24 @@ main() {
         exit 1
     fi
 
-    if [[ ! "${inputDexFilePath}" =~ \.(dex|apk)$ ]]; then
+    if [[ ! "${inputDexFilePath}" =~ \.([Dd][Ee][Xx]|[Aa][Pp][Kk])$ ]]; then
         echo "❌ 文件错误，只支持文件名后缀为 dex 或 apk 的文件"
         exit 1
     fi
 
-    echo "请输入 smali 输出目录（可空，默认为同名 -dex2smali 目录）"
-    read -r outputSmaliDirPath
-    outputSmaliDirPath=$(parseComputerFilePath "${outputSmaliDirPath}")
-
-    if [[ -z "${outputSmaliDirPath}" ]]; then
-        base="${inputDexFilePath%.*}"
-        outputSmaliDirPath="${base}-dex2smali-$(date "+%Y%m%d%H%M%S")"
-    else
-        # 使用安全的输出目录
-        outputSmaliDirPath=$(createSafeOutputDir "${outputSmaliDirPath}" "dex2smali" "${inputDexFilePath}")
+    outputSmaliDirPath="${inputDexFilePath%.*}"
+    dex2smaliDirSuffix="-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${outputSmaliDirPath}" ]]; then
+        outputSmaliDirPath="${outputSmaliDirPath}${dex2smaliDirSuffix}"
+    elif [[ -d "${outputSmaliDirPath}" ]]; then
+        if [[ "$(find "${outputSmaliDirPath}" -mindepth 1 | head -1)" ]]; then
+            outputSmaliDirPath="${outputSmaliDirPath}${dex2smaliDirSuffix}"
+        else
+            rmdir "${outputSmaliDirPath}"
+        fi
     fi
 
-    outputPrint="$(java -jar "${resourcesDirPath}$(getFileSeparator)baksmali-2.5.2.jar" d "${inputDexFilePath}" -o "${outputSmaliDirPath}" 2>&1)"
+    outputPrint="$(java -jar "$(getBaksmaliJarFilePath)" d "${inputDexFilePath}" -o "${outputSmaliDirPath}" 2>&1)"
     exitCode=$?
     if (( exitCode != 0 )); then
         echo "❌ dex 转 smali 失败，原因如下："

@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : Git 仓库克隆脚本（支持 SSH/HTTPS）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     echo "请输入要克隆的远端仓库地址（例如 https://... 或 git@...）："
@@ -99,11 +101,11 @@ waitUserInputParameter() {
         echo "👻 目标目录已存在且非空，是否覆盖？（y/n）"
         while true; do
             read -r overwriteConfirm
-            if [[ "${overwriteConfirm}" == "y" || "${overwriteConfirm}" == "Y" ]]; then
+            if [[ "${overwriteConfirm}" =~ ^[yY]$ ]]; then
                 echo "🧹 正在清理原目录以覆盖..."
                 rm -rf "${targetDirPath}"
                 break
-            elif [[ "${overwriteConfirm}" == "n" || "${overwriteConfirm}" == "N" ]]; then
+            elif [[ "${overwriteConfirm}" =~ ^[nN]$ ]]; then
                 baseDirPath=$(dirname "${targetDirPath}")
                 suffix=2
                 newDirPath="${baseDirPath}$(getFileSeparator)${repositoryName} (${suffix})"
@@ -160,10 +162,10 @@ loopCloneRepository() {
         echo "👻 已重试 ${maxRetryCount} 次仍失败，是否继续重试？（y/n）"
         while true; do
             read -r retryConfirm
-            if [[ "${retryConfirm}" == "y" || "${retryConfirm}" == "Y" ]]; then
+            if [[ "${retryConfirm}" =~ ^[yY]$ ]]; then
                 currentRetryCount=1
                 break
-            elif [[ "${retryConfirm}" == "n" || "${retryConfirm}" == "N" ]]; then
+            elif [[ "${retryConfirm}" =~ ^[nN]$ ]]; then
                 echo "✅ 用户手动取消重试"
                 exit 0
             else

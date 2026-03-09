@@ -5,10 +5,8 @@
 #      time    : 2026/01/25
 #      desc    : 文件路径工具脚本
 # ----------------------------------------------------------------------
-[ -z "" ] || source "/SystemPlatform.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh"
-[ -z "" ] || source "/EnvironmentTools.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/EnvironmentTools.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh" || source "SystemPlatform.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/EnvironmentTools.sh" || source "EnvironmentTools.sh"
 
 getFileSeparator() {
     if isWindows; then
@@ -20,19 +18,25 @@ getFileSeparator() {
 }
 
 getWorkDirPath() {
-    pwd
+    # 优先使用 OUTPUT_DIR 环境变量（由应用设置）
+    if [[ -n "${OUTPUT_DIR}" && -d "${OUTPUT_DIR}" ]]; then
+        echo "${OUTPUT_DIR}"
+    else
+        pwd
+    fi
 }
 
 getResourcesDirPath() {
     local resourcesDirPath
-    tempDirPath="$(getWorkDirPath)"
+    # 始终从当前实际工作目录（pwd）查找 resources，而不是从 OUTPUT_DIR
+    tempDirPath="$(pwd)"
     while [[ "${tempDirPath}" != "$(getFileSeparator)" ]]; do
-        # 优先查找 androidcmdtools-resources
+        # 优先查找 androidcmdtools-resources 目录
         if [[ -d "${tempDirPath}$(getFileSeparator)androidcmdtools-resources" ]]; then
             resourcesDirPath="${tempDirPath}$(getFileSeparator)androidcmdtools-resources"
             break
         fi
-        # 兼容原来的 resources 目录名
+        # 兼容旧的 resources 目录名
         if [[ -d "${tempDirPath}$(getFileSeparator)resources" ]]; then
             resourcesDirPath="${tempDirPath}$(getFileSeparator)resources"
             break
@@ -141,73 +145,4 @@ getFileSha256() {
     fi
 
     return 1
-}
-
-# 安全检查：防止用户输入系统重要目录
-# 参数1: 用户输入的目录路径
-# 返回: 0=安全目录, 1=危险目录
-isSafeDirectory() {
-    local inputDir="$1"
-    
-    # 危险目录列表
-    local dangerousPaths=(
-        "$HOME"
-        "$HOME/Desktop"
-        "$HOME/Downloads"
-        "$HOME/Documents"
-        "$HOME/Pictures"
-        "$HOME/Music"
-        "$HOME/Videos"
-        "/"
-        "/Users"
-        "/System"
-        "/Applications"
-        "/Library"
-        "/private"
-        "/usr"
-        "/bin"
-        "/sbin"
-        "/etc"
-        "/var"
-        "/tmp"
-    )
-    
-    # 检查是否是危险目录
-    for dangerousPath in "${dangerousPaths[@]}"; do
-        if [[ "${inputDir}" == "${dangerousPath}" ]]; then
-            return 1  # 危险目录
-        fi
-    done
-    
-    return 0  # 安全目录
-}
-
-# 创建安全的输出目录
-# 参数1: 用户输入的目录路径
-# 参数2: 子目录前缀（如 "apk-decompile", "screenshot", "recording"）
-# 参数3: 可选的文件名（用于生成更具体的目录名）
-# 返回: 安全的输出目录路径
-createSafeOutputDir() {
-    local inputDir="$1"
-    local prefix="$2"
-    local fileName="${3:-}"
-    
-    local timestamp=$(date "+%Y%m%d%H%M%S")
-    local safeDir
-    
-    # 如果提供了文件名，提取基础名称
-    if [[ -n "${fileName}" ]]; then
-        local baseName=$(basename "${fileName%.*}")
-        safeDir="${inputDir}/${prefix}-${baseName}-${timestamp}"
-    else
-        safeDir="${inputDir}/${prefix}-${timestamp}"
-    fi
-    
-    # 检查是否是危险目录
-    if ! isSafeDirectory "${inputDir}"; then
-        echo "⚠️  检测到系统重要目录，为了安全，将在该目录下创建子目录" >&2
-        echo "📁 实际输出目录：${safeDir}" >&2
-    fi
-    
-    echo "${safeDir}"
 }

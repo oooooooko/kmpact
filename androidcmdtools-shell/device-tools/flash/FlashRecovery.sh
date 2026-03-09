@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : 刷写恢复分区脚本（fastboot flash recovery）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../business/DevicesSelector.sh"
-source "${scriptDirPath}/../../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 flashRecoveryForDevice() {
     fastbootDeviceList=()
@@ -37,7 +38,7 @@ flashRecoveryForDevice() {
         return 1
     fi
 
-    if [[ ! "${recoveryFilePath}" =~ \.(img)$ ]]; then
+    if [[ ! "${recoveryFilePath}" =~ \.([Ii][Mm][Gg])$ ]]; then
         echo "❌ 文件错误，只接受文件名后缀为 img 的文件"
         exit 1
     fi
@@ -45,10 +46,10 @@ flashRecoveryForDevice() {
     echo "这是一个危险操作，你确定要给设备刷入新的 recovery ？（y/n）"
     read -r flashConfirm
 
-    if [[ "${flashConfirm}" == "n" || "${flashConfirm}" == "N" ]]; then
+    if [[ "${flashConfirm}" =~ ^[nN]$ ]]; then
         echo "✅ 用户手动取消操作"
         return 0
-    elif [[ "${flashConfirm}" != "y" && "${flashConfirm}" != "Y" ]]; then
+    elif [[ ! "${flashConfirm}" =~ ^[yY]$ ]]; then
         echo "❌ 无效选择，已取消操作"
         return 1
     fi

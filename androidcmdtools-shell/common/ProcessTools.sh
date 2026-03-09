@@ -5,7 +5,7 @@
 #      time    : 2026/01/25
 #      desc    : 进程管理工具
 # ----------------------------------------------------------------------
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh" || source "SystemPlatform.sh"
 
 isProcessRunning() {
     local processName=$1

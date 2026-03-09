@@ -5,10 +5,8 @@
 #      time    : 2026/01/25
 #      desc    : 剪贴板工具
 # ----------------------------------------------------------------------
-[ -z "" ] || source "/SystemPlatform.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh"
-[ -z "" ] || source "/EnvironmentTools.sh"
-source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/EnvironmentTools.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/SystemPlatform.sh" || source "SystemPlatform.sh"
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/EnvironmentTools.sh" || source "EnvironmentTools.sh"
 
 isIpV4Format() {
     local ip=$1

@@ -5,24 +5,20 @@
 #      time    : 2026/01/25
 #      desc    : Dex 转 Class 脚本（dex2jar 还原 class）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../../common/FileTools.sh"
-source "${scriptDirPath}/../../../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../../common/SystemPlatform.sh" && \
+source "../../../common/EnvironmentTools.sh" && \
+source "../../../common/FileTools.sh" && \
+source "../../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 main() {
     printCurrentSystemType
     checkJavaEnvironment
-
-    resourcesDirPath=$(getResourcesDirPath)
-    if [[ -z "${resourcesDirPath}" ]]; then
-        echo "❌ 未找到 resources 目录，请确保它位于脚本的当前目录或者父目录"
-        exit 1
-    fi
-    echo "资源目录为：${resourcesDirPath}"
 
     echo "请输入要转换的 dex/apk 文件路径："
     read -r inputFilePath
@@ -33,17 +29,28 @@ main() {
         exit 1
     fi
 
-    if [[ ! "${inputFilePath}" =~ \.(dex|apk)$ ]]; then
+    if [[ ! "${inputFilePath}" =~ \.([Dd][Ee][Xx]|[Aa][Pp][Kk])$ ]]; then
         echo "❌ 文件错误，只支持文件名后缀为 dex 或 apk 的文件"
         exit 1
     fi
 
     tempJar="${inputFilePath%.*}.jar"
-    classesDirPath="${inputFilePath%.*}-dex2class-$(date "+%Y%m%d%H%M%S")"
     echo "中间 jar 路径：${tempJar}"
+
+    classesDirPath="${inputFilePath%.*}"
+    dex2classDirSuffix="-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${classesDirPath}" ]]; then
+        classesDirPath="${classesDirPath}${dex2classDirSuffix}"
+    elif [[ -d "${classesDirPath}" ]]; then
+        if [[ "$(find "${classesDirPath}" -mindepth 1 | head -1)" ]]; then
+            classesDirPath="${classesDirPath}${dex2classDirSuffix}"
+        else
+            rmdir "${classesDirPath}"
+        fi
+    fi
     echo "classes 输出目录：${classesDirPath}"
 
-    outputPrint="$("${resourcesDirPath}$(getFileSeparator)dex2jar-2.4$(getFileSeparator)d2j-dex2jar.sh" -f -o "${tempJar}" "${inputFilePath}" 2>&1)"
+    outputPrint="$("$(getDexToJarShellFilePath)" -f -o "${tempJar}" "${inputFilePath}" 2>&1)"
     exitCode=$?
     if (( exitCode != 0 )) || [[ ! -f "${tempJar}" ]]; then
         echo "❌ dex 转 jar 失败，原因如下："

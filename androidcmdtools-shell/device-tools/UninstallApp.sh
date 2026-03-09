@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : adb 卸载脚本（支持多包名卸载和多设备并行卸载）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     echo "请输入要卸载应用包名（可输入多个，空格分隔）："
@@ -54,7 +56,7 @@ uninstallSingleApp() {
         echo "💡 [${deviceId}] 设备未安装 ${packageName} 应用，跳过卸载"
         return 2
     fi
-    if [[ ${retainDataChoice} == "y" || ${retainDataChoice} == "Y" ]]; then
+    if [[ ${retainDataChoice} =~ ^[yY]$ ]]; then
         local outputPrint
         outputPrint=$(adb -s "${deviceId}" shell cmd package uninstall -k "${packageName}" < /dev/null 2>&1)
         local exitCode=$?

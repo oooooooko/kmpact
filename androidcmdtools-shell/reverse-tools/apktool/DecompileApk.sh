@@ -5,18 +5,18 @@
 #      time    : 2026/01/25
 #      desc    : Apk 反编译脚本（使用 apktool 解包）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../business/ResourceManager.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
-    resourcesDirPath=$(getResourcesDirPath)
-    echo "资源目录为：${resourcesDirPath}"
-
     echo "请输入要反编译 apk 包的路径"
     read -r sourceApkFilePath
     sourceApkFilePath=$(parseComputerFilePath "${sourceApkFilePath}")
@@ -26,7 +26,7 @@ waitUserInputParameter() {
         exit 1
     fi
 
-    if [[ ! "${sourceApkFilePath}" =~ \.(apk)$ ]]; then
+    if [[ ! "${sourceApkFilePath}" =~ \.([Aa][Pp][Kk])$ ]]; then
         echo "❌ 文件错误，只能反编译文件名后缀为 apk 的文件"
         exit 1
     fi
@@ -36,60 +36,38 @@ waitUserInputParameter() {
     apkDecompileDirPath=$(parseComputerFilePath "${apkDecompileDirPath}")
 
     if [[ -z "${apkDecompileDirPath}" ]]; then
-        # 默认：在APK同级目录创建带时间戳的目录
-        apkDecompileDirPath="${sourceApkFilePath%.*}-decompile-$(date "+%Y%m%d%H%M%S")"
+        apkDecompileDirPath="${sourceApkFilePath%.*}"
     else
-        # 安全检查：防止用户输入系统重要目录
-        local dangerousPaths=(
-            "$HOME"
-            "$HOME/Desktop"
-            "$HOME/Downloads"
-            "$HOME/Documents"
-            "$HOME/Pictures"
-            "$HOME/Music"
-            "$HOME/Videos"
-            "/"
-            "/Users"
-            "/System"
-            "/Applications"
-            "/Library"
-            "/private"
-            "/usr"
-            "/bin"
-            "/sbin"
-            "/etc"
-            "/var"
-            "/tmp"
-        )
-        
-        # 检查是否是危险目录
-        local isDangerous=false
-        for dangerousPath in "${dangerousPaths[@]}"; do
-            if [[ "${apkDecompileDirPath}" == "${dangerousPath}" ]]; then
-                isDangerous=true
-                break
-            fi
-        done
-        
-        if [[ "${isDangerous}" == true ]]; then
-            echo "⚠️  检测到系统重要目录，为了安全，将在该目录下创建子目录"
-        fi
-        
-        # 在用户指定的目录下创建带时间戳的子目录
-        local timestamp=$(date "+%Y%m%d%H%M%S")
-        local apkBaseName=$(basename "${sourceApkFilePath%.*}")
-        apkDecompileDirPath="${apkDecompileDirPath}/apk-decompile-${apkBaseName}-${timestamp}"
-        
-        echo "📁 实际输出目录：${apkDecompileDirPath}"
+        apkDecompileDirPath="${apkDecompileDirPath}$(getFileSeparator)$(basename "${sourceApkFilePath%.*}")"
     fi
 
-    local apktoolJarFileName="apktool-2.12.1.jar"
-    echo "请输入 apktool jar 包的路径（可为空，默认使用 ${apktoolJarFileName}）"
+    decompileDirNameSuffix="-decompile-$(date "+%Y%m%d%H%M%S")"
+    if [[ -f "${apkDecompileDirPath}" ]]; then
+        apkDecompileDirPath="${apkDecompileDirPath}${decompileDirNameSuffix}"
+    elif [[ -d "${apkDecompileDirPath}" && "$(find "${apkDecompileDirPath}" -mindepth 1 | head -1)" ]]; then
+        echo "该目录已经存在且不为空，是否覆盖原有内容？（y/n）"
+        while true; do
+            read -r rewriteConfirm
+            if [[ "${rewriteConfirm}" =~ ^[yY]$ ]]; then
+                rm -rf "${apkDecompileDirPath:?}"
+                mkdir -p "${apkDecompileDirPath}"
+                break
+            elif [[ "${rewriteConfirm}" =~ ^[nN]$ ]]; then
+                apkDecompileDirPath="${apkDecompileDirPath}${decompileDirNameSuffix}"
+                break
+            else
+                echo "👻 输入不正确，请输入正确的选项（y/n）"
+                continue
+            fi
+        done
+    fi
+
+    echo "请输入 apktool jar 包的路径（可为空）"
     read -r apktoolJarFilePath
     apktoolJarFilePath=$(parseComputerFilePath "${apktoolJarFilePath}")
 
     if [[ -z "${apktoolJarFilePath}" ]]; then
-        apktoolJarFilePath="${resourcesDirPath}$(getFileSeparator)${apktoolJarFileName}"
+        apktoolJarFilePath=$(getApktoolJarFilePath)
     fi
 
     if [[ ! -f "${apktoolJarFilePath}" ]]; then
@@ -141,7 +119,6 @@ decompileApk() {
         exit 1
     fi
 
-    # 核心逻辑：目录不存在或者目录为空
     if [[ ! -d "${apkDecompileDirPath}" || -z "$(ls -A "${apkDecompileDirPath}")" ]]; then
         echo "❌ 反编译失败，请检查 apktool 输出的信息："
         echo "${outputPrint}"

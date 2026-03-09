@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : 录屏保存脚本（录制并保存设备屏幕视频）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" && \
+source "../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     workDirPath=$(getWorkDirPath)
@@ -25,10 +26,6 @@ waitUserInputParameter() {
     recordTargetDirPath=$(parseComputerFilePath "${recordTargetDirPath}")
     if [[ -z "${recordTargetDirPath}" ]]; then
         recordTargetDirPath="${workDirPath}"
-    else
-        # 使用安全的输出目录
-        recordTargetDirPath=$(createSafeOutputDir "${recordTargetDirPath}" "screen-recording")
-        mkdir -p "${recordTargetDirPath}"
     fi
     recordTargetFilePath="${recordTargetDirPath}$(getFileSeparator)${recordFileName}"
 }
@@ -122,16 +119,7 @@ doScreenRecordSingleDevice() {
     local recordPid=${outputPrint}
     echo "录屏进程 PID：${recordPid}"
     echo "录屏进行中，按回车键结束并保存"
-    
-    # 检测是否有TTY可用
-    if [ -t 0 ] && [ -c /dev/tty ]; then
-        # 有TTY，从/dev/tty读取
-        read -r < /dev/tty
-    else
-        # 没有TTY（如在Kiro中运行），从stdin读取
-        read -r
-    fi
-    
+    read -r < /dev/tty
     echo "正在停止录屏并保存文件..."
     stopRemoteRecord "${deviceId}" "${recordPid}"
     trap - INT

@@ -5,13 +5,15 @@
 #      time    : 2026/01/25
 #      desc    : 设备 CPU ABI 获取脚本（查询 abi）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 printDeviceCpuAbi() {
     local deviceId=$1
@@ -51,7 +53,7 @@ printDeviceCpuAbi() {
         abiList="获取为空"
     fi
 
-    echo "✅ [${deviceId}] 设备的 CPU 架构参数为：${abi}"
+    echo "✅ [${deviceId}] 设备的 CPU 架构参数为："
     echo "主 ABI：${abi}"
     echo "32 位 ABI 列表：${abiList32}"
     echo "64 位 ABI 列表：${abiList64}"

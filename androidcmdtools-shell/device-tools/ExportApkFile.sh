@@ -5,15 +5,16 @@
 #      time    : 2026/01/25
 #      desc    : 应用 APK 导出脚本（从设备导出已安装应用）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../business/DevicesSelector.sh" && \
+source "../common/FileTools.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     workDirPath=$(getWorkDirPath)
@@ -23,9 +24,9 @@ waitUserInputParameter() {
     if [[ -z "${targetPackageName}" ]]; then
         echo "是否导出系统应用？（y/n）："
         read -r includeSystemConfirm
-        if [[ "${includeSystemConfirm}" == "y" || "${includeSystemConfirm}" == "Y" ]]; then
+        if [[ "${includeSystemConfirm}" =~ ^[yY]$ ]]; then
             includeSystemApps="true"
-        elif [[ "${includeSystemConfirm}" == "n" || "${includeSystemConfirm}" == "N" ]]; then
+        elif [[ "${includeSystemConfirm}" =~ ^[nN]$ ]]; then
             includeSystemApps="false"
         else
             echo "❌ 无效选择，已取消操作"

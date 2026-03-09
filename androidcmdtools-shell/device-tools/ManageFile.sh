@@ -5,15 +5,16 @@
 #      time    : 2026/01/27
 #      desc    : 管理文件
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../common/EnvironmentTools.sh"
-[ -z "" ] || source "/../business/DevicesSelector.sh"
-source "${scriptDirPath}/../business/DevicesSelector.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/EnvironmentTools.sh" && \
+source "../common/FileTools.sh" && \
+source "../business/DevicesSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 DIVIDING_LINE="-------------------------------------------------------------------------------"
 
@@ -645,7 +646,7 @@ removeTarget() {
     local confirmTip="👻 确认删除【${targetType}】${targetName} 吗？(y/n)："
     echo -e "${colorYellow}${confirmTip}${colorReset}"
     read -r confirmInput
-    if [[ "${confirmInput}" != "y" && "${confirmInput}" != "Y" ]]; then
+    if [[ ! "${confirmInput}" =~ ^[yY]$ ]]; then
         echo -e "\n${colorYellow}💡 已取消删除命令：${targetName}${colorReset}"
         return 1
     fi
@@ -946,7 +947,7 @@ pasteTarget() {
          echo -e "${colorYellow}👻 目标位置已存在同名文件/文件夹：${sourceName}${colorReset}"
          echo -e "是否覆盖/合并？(y/n)："
          read -r confirmInput
-         if [[ "${confirmInput}" != "y" && "${confirmInput}" != "Y" ]]; then
+         if [[ ! "${confirmInput}" =~ ^[yY]$ ]]; then
              echo -e "${colorYellow}💡 已取消操作${colorReset}"
              return 1
          fi

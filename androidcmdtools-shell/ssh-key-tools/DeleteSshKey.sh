@@ -5,11 +5,14 @@
 #      time    : 2026/01/25
 #      desc    : SSH 密钥删除脚本（移除指定密钥）
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../common/SystemPlatform.sh"
-source "${scriptDirPath}/../common/SystemPlatform.sh"
-[ -z "" ] || source "../common/FileTools.sh"
-source "${scriptDirPath}/../common/FileTools.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../common/SystemPlatform.sh" && \
+source "../common/FileTools.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     sshDirPath="${HOME}$(getFileSeparator).ssh"
@@ -81,10 +84,10 @@ waitUserInputParameter() {
     fi
     echo "是否确认删除？（y/n）"
     read -r deleteChoose
-    if [[ "${deleteChoose}" == "n" || "${deleteChoose}" == "N" ]]; then
+    if [[ "${deleteChoose}" =~ ^[nN]$ ]]; then
         echo "✅ 用户手动取消操作"
         exit 0
-    elif [[ "${deleteChoose}" != "y" && "${deleteChoose}" != "Y" ]]; then
+    elif [[ ! "${deleteChoose}" =~ ^[yY]$ ]]; then
         echo "❌ 无效选择，已取消操作"
         exit 1
     fi

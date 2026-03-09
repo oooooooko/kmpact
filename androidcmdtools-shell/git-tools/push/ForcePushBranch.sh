@@ -5,17 +5,17 @@
 #      time    : 2026/01/25
 #      desc    : Git 分支强推脚本
 # ----------------------------------------------------------------------
-scriptDirPath=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-[ -z "" ] || source "../../common/SystemPlatform.sh"
-source "${scriptDirPath}/../../common/SystemPlatform.sh"
-[ -z "" ] || source "../../common/EnvironmentTools.sh"
-source "${scriptDirPath}/../../common/EnvironmentTools.sh"
-[ -z "" ] || source "../../common/FileTools.sh"
-source "${scriptDirPath}/../../common/FileTools.sh"
-[ -z "" ] || source "../../business/GitTools.sh"
-source "${scriptDirPath}/../../business/GitTools.sh"
-[ -z "" ] || source "../../business/GitSelector.sh"
-source "${scriptDirPath}/../../business/GitSelector.sh"
+scriptDirPath=$(dirname "${BASH_SOURCE[0]}")
+originalDirPath=$PWD
+cd "${scriptDirPath}" || exit 1
+source "../../common/SystemPlatform.sh" && \
+source "../../common/EnvironmentTools.sh" && \
+source "../../common/FileTools.sh" && \
+source "../../business/GitTools.sh" && \
+source "../../business/GitSelector.sh" || exit 1
+cd "${originalDirPath}" || exit 1
+unset scriptDirPath
+unset originalDirPath
 
 waitUserInputParameter() {
     repositoryDirPath=$(selectLocalRepositoryPath)
@@ -82,10 +82,10 @@ forcePushBranch() {
 
     echo "👻 强制推送分支会强制覆盖远端分支的提交，你确定要继续吗？（y/n）"
     read -r forcePushBranchConfirm
-    if [[ "${forcePushBranchConfirm}" == "n" || "${forcePushBranchConfirm}" == "N" ]]; then
+    if [[ "${forcePushBranchConfirm}" =~ ^[nN]$ ]]; then
         echo "✅ 用户手动取消强制推送分支"
         exit 0
-    elif [[ "${forcePushBranchConfirm}" != "y" && "${forcePushBranchConfirm}" != "Y" ]]; then
+    elif [[ ! "${forcePushBranchConfirm}" =~ ^[yY]$ ]]; then
         echo "❌ 无效选择，已取消操作"
         exit 0
     fi
@@ -101,11 +101,11 @@ forcePushBranch() {
     echo "👻 强制推送失败，是否进行重试？（y/n）"
     while true; do
         read -r retryConfirm
-        if [[ ${retryConfirm} == "n" || ${retryConfirm} == "N" ]]; then
+        if [[ ${retryConfirm} =~ ^[nN]$ ]]; then
             (cd "${repositoryDirPath}" && git branch -D "${backupBranch}" < /dev/null > /dev/null 2>&1)
             echo "✅ 已放弃强制推送分支，已删除本地备份分支 ${backupBranch}"
             exit "${exitCode}"
-        elif [[ ${retryConfirm} != "y" && ${retryConfirm} != "Y" ]]; then
+        elif [[ ! ${retryConfirm} =~ ^[yY]$ ]]; then
             echo "👻 输入不正确，请输入正确的选项（y/n）"
             continue
         fi
