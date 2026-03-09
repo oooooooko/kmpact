@@ -57,8 +57,8 @@ class ExecuteCommandUseCaseImpl(
         onNeedInput: (() -> Unit)?
     ): Result<CommandResult> {
         return try {
-            // 转换脚本路径
-            val actualScriptPath = command.scriptPath?.replace("shell/", "androidcmdtools-shell/")
+            // 脚本路径已经是正确的，不需要转换
+            val actualScriptPath = command.scriptPath
             
             // 输出命令信息
             onOutput?.invoke("⏳ 正在执行命令: ${command.name}")

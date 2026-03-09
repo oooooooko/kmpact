@@ -46,7 +46,7 @@ actual class CommandExecutor {
     ): CommandResult = withContext(Dispatchers.IO) {
         try {
             // 获取脚本路径
-            val actualScriptPath = command.scriptPath?.replace("shell/", "androidcmdtools-shell/")
+            val actualScriptPath = command.scriptPath
             val scriptPath = actualScriptPath?.let { findScriptPath(it) }
             
             if (scriptPath == null || !scriptPath.exists()) {
@@ -92,6 +92,10 @@ actual class CommandExecutor {
             env["TERM"] = "dumb"  // 设置TERM避免警告
             env["INTERACTIVE_MODE"] = "false"  // 自定义变量，脚本可以检测
             
+            // 设置输出路径环境变量，供脚本使用
+            val downloadPath = com.okko.kmpact.data.settings.SettingsManager.getCurrentSettings().downloadPath
+            env["OUTPUT_DIR"] = downloadPath  // 设置输出目录环境变量
+            
             // 设置 PATH 环境变量，包含 Android SDK 工具路径
             val currentPath = env["PATH"] ?: ""
             val additionalPaths = mutableListOf<String>()
@@ -114,7 +118,7 @@ actual class CommandExecutor {
             val newPath = (additionalPaths + currentPath.split(":")).joinToString(":")
             env["PATH"] = newPath
             
-            // 设置工作目录
+            // 设置工作目录（保持在脚本目录，以便脚本能找到resources等资源）
             if (workingDir != null) {
                 processBuilder.directory(File(workingDir))
             } else {
@@ -260,8 +264,8 @@ actual class CommandExecutor {
      * 检查脚本是否存在
      */
     actual fun checkScriptExists(scriptPath: String): Boolean {
-        val actualScriptPath = scriptPath.replace("shell/", "androidcmdtools-shell/")
-        val file = findScriptPath(actualScriptPath)
+        // 路径已经是正确的，不需要转换
+        val file = findScriptPath(scriptPath)
         return file?.exists() ?: false
     }
     
@@ -269,8 +273,8 @@ actual class CommandExecutor {
      * 获取脚本绝对路径
      */
     actual fun getScriptAbsolutePath(scriptPath: String): String {
-        val actualScriptPath = scriptPath.replace("shell/", "androidcmdtools-shell/")
-        val file = findScriptPath(actualScriptPath)
+        // 路径已经是正确的，不需要转换
+        val file = findScriptPath(scriptPath)
         return file?.absolutePath ?: "未找到"
     }
     
