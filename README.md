@@ -108,7 +108,7 @@ composeApp/build/compose/binaries/main/msi/
 
 ## ✨ 功能特性
 
-### 📦 包体工具 (5个)
+### 📦 包体工具
 
 - **对APK进行签名**: 使用 keystore 为 APK 签名
 - **获取APK签名信息**: 查看 APK 的签名详情
@@ -117,9 +117,9 @@ composeApp/build/compose/binaries/main/msi/
 - **包体比较**: 比较 APK/AAR/JAR/AAB 包体差异
 - **aab转apk**: 将 aab 转换为 apks
 
-### 📱 设备工具 (30个)
+### 📱 设备工具
 
-#### 基础操作 (10个)
+#### 基础操作
 - **安装应用**: 安装 APK 到设备
 - **卸载应用**: 从设备卸载应用
 - **保存截图**: 截取设备屏幕并保存到电脑
@@ -131,7 +131,7 @@ composeApp/build/compose/binaries/main/msi/
 - **设备重启**: 重启 Android 设备
 - **设备关机**: 关闭 Android 设备
 
-#### 高级操作 (13个)
+#### 高级操作
 - **连接无线ADB**: 通过 WiFi 连接设备
 - **断开无线ADB**: 断开 WiFi 连接的设备
 - **授予应用权限**: 授予应用指定权限
@@ -147,7 +147,7 @@ composeApp/build/compose/binaries/main/msi/
 - **管理设备文件**: 浏览和管理设备文件系统
 - **运行Monkey测试**: 执行随机压力测试
 
-#### 模拟操作 (7个)
+#### 模拟操作
 - **点击屏幕**: 模拟点击屏幕指定坐标
 - **输入文本**: 模拟输入文本内容
 - **按返回键**: 模拟按下返回键
@@ -156,17 +156,17 @@ composeApp/build/compose/binaries/main/msi/
 - **按电源键**: 模拟按下电源键
 - **按任务键**: 模拟按下任务切换键
 
-### 🔧 逆向工具 (11个)
+### 🔧 逆向工具
 
-#### APK反编译 (2个)
+#### APK反编译
 - **apktool反编译**: 反编译 APK 到 smali 代码
 - **apktool回编译**: 从 smali 代码回编译 APK
 
-#### 源码查看 (2个)
+#### 源码查看
 - **jadx查看**: 使用 jadx 查看 APK 源码
 - **jd-gui查看**: 使用 jd-gui 查看 JAR 源码
 
-#### 格式转换 (7个)
+#### 格式转换
 - **dex转jar**: 将 dex 文件转换为 jar
 - **jar转dex**: 将 jar 文件转换为 dex
 - **dex转smali**: 将 dex 文件转换为 smali 代码
